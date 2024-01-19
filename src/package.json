@@ -1,0 +1,17 @@
+{
+  "version": "1.0.0",
+  "description": "Graddoor",
+  "name": "graddoor-webpack",
+  "private": true,
+  "scripts": {
+    "updateVersion": "node ./webpack/updateVersion.js",
+
+    "publicProd": "webpack --env production --config ./webpack/webpack.config.js",
+    "publicDev": "webpack --config ./webpack/webpack.config.js",
+
+    "mochaTestW": "mocha --watch --parallel --config ./test/.mocharc.jsonc",
+    "mochaTestNotWORK": "cd test && npm run mochaTest",
+
+    "publicDevServe": "webpack serve --config ./webpack/webpack.config.js"
+  }
+}
