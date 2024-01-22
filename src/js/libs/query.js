@@ -2,7 +2,7 @@
 
 import {MAIN_URL} from "../const";
 
-const MAIN_PHP_PATH = MAIN_URL + 'bot.php';
+const MAIN_PHP_PATH = MAIN_URL + 'main.php';
 
 const checkJSON = (data) => {
   try {
@@ -12,8 +12,8 @@ const checkJSON = (data) => {
   }
   catch (e) {
     const msg = e['xdebug_message'] || e.message || e;
-    msg && f.showMsg(msg, 'error', false);
-    data && f.showMsg(data, 'error', false);
+    //msg && f.showMsg(msg, 'error', false);
+    //data && f.showMsg(data, 'error', false);
     return {status: false};
   }
 };
@@ -56,7 +56,7 @@ const query = (url, body, type = 'json') => {
 
     if (typeof body === 'object') {
       Object.entries(body).forEach(([k, v]) => {
-        data.set(k, typeof v === 'object' ? JSON.stringify(v) : v.toString());
+        v && data.set(k, typeof v === 'object' ? JSON.stringify(v) : v.toString());
       });
     }
     else data.set('content', body);
@@ -88,12 +88,13 @@ export default {
    * Fetch Get
    * @param {object} obj
    * @param {string?|any?: c.MAIN_PHP_PATH} obj.url - link to index.php.
-   * @param {string} obj.data - get params as string.
+   * @param {string|Object} obj.data - get params as string.
    * @param {string?: 'json'} obj.type - return type.
-   * @return {Promise<Response>}
+   * @return {Promise<string | void>}
    * @constructor
    */
-  Get: ({url = MAIN_PHP_PATH, data, type = 'json'}) => query(url + '?' + data, null, type),
+  Get: ({url = MAIN_PHP_PATH, data, type = 'json'}) =>
+    query(url + '?' + (typeof data === 'string' ? data : (new URLSearchParams(data)).toString()), null, type),
 
   /**
    * Fetch Post
@@ -103,7 +104,7 @@ export default {
    * Any body that you want to add to your request object.
    * Note that a request using the GET or HEAD method cannot have a body.
    * @param {string?: 'json'} obj.type - return type.
-   * @return {Promise<Response>}
+   * @return {Promise<string | void>}
    */
   Post: ({url = MAIN_PHP_PATH, data, type = 'json'}) => query(url, data, type),
 };

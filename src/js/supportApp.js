@@ -12,7 +12,6 @@ import btnStyle from "../css/btn.scss";
 
 class Application {
   constructor() {
-    debugger
     const style = document.createElement('style');
 
     style.innerHTML = styleApp['toString']();

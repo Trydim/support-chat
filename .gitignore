@@ -1,4 +1,7 @@
 /.idea/
 /test/
 /css/
+/logs/
+/storage/
 *.js*
+/php/libs/vendor/

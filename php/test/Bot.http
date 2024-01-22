@@ -1,0 +1,14 @@
+POST https://api.telegram.org/bot6985649319:AAEm0yWTVN1EJd4_QN2AQLFZFAW9pj5lKBU/sendMessage
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="chat_id"
+
+914134752
+--WebAppBoundary--
+Content-Disposition: form-data; name="text"
+
+query test
+--WebAppBoundary--
+
+###

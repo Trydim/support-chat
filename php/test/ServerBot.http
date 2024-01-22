@@ -1,0 +1,15 @@
+POST http://support-chat/bot.php
+Content-Type: application/json
+
+{"update_id":222027457,
+"message":{"message_id":34,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705961223,"text":"/start","entities":[{"offset":0,"length":6,"type":"bot_command"}]}}
+
+###
+
+POST http://support-chat/bot.php
+Content-Type: application/json
+
+{"update_id":222027477,
+  "message":{"message_id":57,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705962964,"text":"test 54456"}}
+
+###
