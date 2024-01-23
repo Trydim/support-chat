@@ -9,18 +9,15 @@ $result = [];
 $action = $main->getParam('action');
 
 switch ($action) {
-  case 'start':
-    //$result = $main->db->
-    break;
   case 'addMessage':
     $request = $main->request;
-    $result = $main->db->addMessage();
+    $result  = $main->db->addMessage();
 
     $data = [
       'host'    => $request->server->get('HTTP_HOST'),
       'chatKey' => $request->cookies->get(COOKIE_SUPPORT_KEY),
       'type'    => $request->request->get('type'),
-      'text'    => $request->request->get('content'),
+      'text'    => $main->getParam('content'),
     ];
 
     $result['error'] = (new Bot(['message' => $data]))->sendToBot()->getError();

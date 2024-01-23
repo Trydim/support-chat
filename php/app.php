@@ -2,6 +2,7 @@
 
 require_once __DIR__ . '/func.php';
 
+const SUPPORT_HOST = 'https://vistegra.by/support/';
 const COOKIE_SUPPORT_KEY = 'support-user-key';
 
 const DB_CONFIG = [

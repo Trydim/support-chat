@@ -25,9 +25,7 @@ try {
     case 'message':
       $main = new Main(['DEBUG' => true]);
 
-      $result = $main->db->addTGMessage(
-        $bot->getChatKey(), $bot->getUser(), $bot->getType(), $bot->getContent()
-      );
+      $result = $main->db->addTGMessage($bot);
 
       // расскидать всем подписчикам в боте $bot->sendToBot();
       break;

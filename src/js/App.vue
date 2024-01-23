@@ -9,7 +9,10 @@
       <div class="chat-messages">
         <div v-for="(item, index) of content" :key="index" class="message-box-holder">
           <div v-if="!item.author" class="message-sender">Оператор</div>
-          <div class="message-box" :class="{'message-partner': !item.author}">{{ item.content }}</div>
+          <div class="message-box" :class="{'message-partner': !item.author}">
+            <template v-if="item.type === 'text'">{{ item.content }}</template>
+            <img v-else :src="item.content" alt="">
+          </div>
         </div>
       </div>
 
@@ -46,7 +49,7 @@
       </div>-->
 
       <template #footer>
-        <dialog-footer v-model="message" @send="send"></dialog-footer>
+        <dialog-footer v-model="sendData" @send="send"></dialog-footer>
       </template>
     </Dialog>
   </div>
@@ -70,8 +73,9 @@ export default {
     visible: false,
     position: POSITION[3],
 
+    syncInterval: undefined,
     content: [],
-    message: '',
+    sendData: '',
   }),
   computed: {},
   watch   : {
@@ -92,6 +96,7 @@ export default {
         return {
           author: item.userKey === this.userKey,
           date  : item.date,
+          type  : item.type,
           content: item.content,
         };
       });
@@ -108,9 +113,9 @@ export default {
     },
 
     startSync() {
-      this.syncInterval = setInterval(() => this.loadMessages(new Date().getTime() / 1e3 | 0), SYNC_INTERVAL);
+      //this.syncInterval = setInterval(() => this.loadMessages(new Date().getTime() / 1e3 | 0), SYNC_INTERVAL);
 
-      setTimeout(() => this.stopSync(), SYNC_DELAY);
+      //setTimeout(() => this.stopSync(), SYNC_DELAY);
     },
     stopSync() { clearInterval(this.syncInterval) },
     restartSync() {
@@ -119,19 +124,22 @@ export default {
     },
 
     send(finish) {
+      const type = this.sendData instanceof Blob ? 'file' : 'text';
+
       this.restartSync();
 
       query.Post({
         data: {
           action: 'addMessage',
-          type: this.message instanceof Blob ? 'file' : 'text',
-          content: this.message,
+          type,
+          content: this.sendData,
         }
       }).then(d => {
         if (d['status']) this.content.push({
           author: true,
           date  : new Date().toLocaleString('ru'),
-          content: this.message,
+          type,
+          content: type === 'file' ? URL.createObjectURL(this.sendData) : this.sendData,
         });
       }).finally(finish);
     }

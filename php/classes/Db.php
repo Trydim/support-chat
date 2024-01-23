@@ -10,17 +10,9 @@ class Db extends R {
         DB_DATE_TO     = '2100-01-01 00:00:00',
         SHOW_DATE_FORMAT = 'H:i d-m-Y';
 
-  const DB_JSON_FIELDS = [
-    'inputValue', 'saveValue', 'importantValue', 'reportValue',
-    'contacts', 'customerContacts', 'customization',
-    'cmsParam', 'properties', 'permissionValue'
-  ];
-
   const DB_DATE_FIELDS = [
     'createDate', 'lastEditDate', 'registerDate'
   ];
-
-  const DB_BLOB_FIELDS = ['reportValue', 'settings'];
 
   /**
    * @var Main
@@ -31,12 +23,6 @@ class Db extends R {
    * @var bool
    */
   private $connected = false;
-
-
-  /**
-   * @var string
-   */
-  private $login;
 
   /**
    * Plugin readBean for special name
@@ -152,101 +138,53 @@ class Db extends R {
     return $simple ? self::getCol($sql) : self::getAll($sql);
   }
 
-  /**
-   * @param $dbTable
-   * @param $columnName
-   * @param $value
-   *
-   * @return integer
-   */
-  public function checkHaveRows($dbTable, $columnName, $value): int {
-    return intval(self::getCell("SELECT count(*) FROM " . $this->pf($dbTable) .
-                                    " WHERE $columnName = :value", [':value' => $value]));
-  }
-
-  /**
-   * @param string $dbTable
-   * @param array $ids
-   * @param string $primaryKey
-   *
-   * @return int
-   */
-  public function deleteItem(string $dbTable, array $ids, string $primaryKey = 'ID'): int {
-    $dbTable = $this->pf($dbTable);
-    $count = 0;
-    if ($primaryKey !== 'ID') {
-      foreach ($ids as $id) {
-        $count += self::exec("DELETE FROM $dbTable WHERE $primaryKey = '$id'");
-      }
-      return $count;
-    }
-
-    if (count($ids) === 1) {
-      $bean = self::xdispense($dbTable);
-      $bean->id = $ids[0];
-      $count = self::trash($bean);
-    } else {
-      $beans = self::xdispense($dbTable, count($ids));
-
-      for ($i = 0; $i < count($ids); $i++) {
-        $beans[$i]->id = $ids[$i];
-      }
-
-      $count = self::trashAll($beans);
-    }
-    return $count;
-  }
-
-  /**
-   * @param string $dbTable
-   * @param array  $requireParam
-   * @return mixed
-   */
-  public function getLastID(string $dbTable, array $requireParam = []) {
-    $bean = self::xdispense($this->pf($dbTable));
-    foreach ($requireParam as $field => $value) $bean->$field = $value;
-    self::store($bean);
-
-    return $bean->getID();
-  }
-
   //------------------------------------------------------------------------------------------------------------------
 
   public function addMessage(): array {
     $this->checkConnection();
 
-    $cookies = $this->main->request->cookies;
-    $request = $this->main->request->request;
-    $type = $request->get('type') ?? 'text';
+    $request = $this->main->request;
+    $cookies = $request->cookies;
 
+    $type = $request->request->get('type') ?? 'text';
+    $content = $request->request->get('content');
     $bean = R::dispense('messages');
 
     if ($type === 'file') {
-      // Сохранить файл
+      $fs = new FS($this->main);
+      $content = $fs->prepareFile($request->files->get('content'))->getUri();
     }
 
     $bean->chatKey = $cookies->get(COOKIE_SUPPORT_KEY);
     $bean->userKey = $cookies->get(COOKIE_SUPPORT_KEY);
     $bean->type    = $type;
-    $bean->content = $request->get('content');
+    $bean->content = $content;
 
+    $this->main->setParam('content', $content);
     return ['id' => R::store($bean)];
   }
 
-  public function addTGMessage(string $chatKey, string $userKey, string $type, string $content): array {
+  public function addTGMessage(Bot $bot): array {
     $this->checkConnection();
 
     $bean = self::dispense('messages');
+    $chatKey = $bot->getChatKey();
     $chatKey = self::findOne('messages', ' chat_key LIKE ? ', ["%$chatKey%"])->chatKey;
-
-    if ($type === 'file') {
-      // Сохранить файл
-    }
+    $user    = $bot->getUser();
 
     $bean->chatKey = $chatKey;
-    $bean->userKey = $userKey;
-    $bean->type    = $type;
-    $bean->content = $content;
+    $bean->userKey = $user;
+
+    if ($bot->getType() === 'file') {
+      $bean->type    = 'file';
+      $bean->content = $bot->getFileContent();
+
+      $r = R::store($bean);
+      if ($r === 0) def('error');
+    }
+
+    $bean->type    = 'text';
+    $bean->content = $bot->getContent();
 
     return ['id' => R::store($bean)];
   }
