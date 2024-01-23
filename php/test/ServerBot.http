@@ -1,15 +1,29 @@
-POST http://support-chat/bot.php
+### start
+POST http://supportchat/bot.php
 Content-Type: application/json
 
 {"update_id":222027457,
 "message":{"message_id":34,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705961223,"text":"/start","entities":[{"offset":0,"length":6,"type":"bot_command"}]}}
 
-###
 
-POST http://support-chat/bot.php
+### stop
+POST http://supportchat/bot.php
 Content-Type: application/json
 
-{"update_id":222027477,
-  "message":{"message_id":57,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705962964,"text":"test 54456"}}
+{"update_id":222027458,"message":{"message_id":35,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705961223,"text":"/stop","entities":[{"offset":0,"length":5,"type":"bot_command"}]}}
+
+
+### Просто сообщение - отправить только адресату напоминание
+POST http://supportchat/bot.php
+Content-Type: application/json
+
+{"update_id":222027477,"message":{"message_id":57,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705962964,"text":"test 54456"}}
+
+
+### Кнопка ответить
+POST http://supportchat/bot.php
+Content-Type: application/json
+
+{"update_id":222027522,"message":{"message_id":109,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706008792,"text":"@vistegra_support_bot >4487345<:\n\ntest with target","entities":[{"offset":0,"length":21,"type":"mention"}]}}
 
 ###

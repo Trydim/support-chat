@@ -1,17 +1,23 @@
 .vis-support-btn {
   position: fixed;
   background: grey;
-  color: lightgrey;
+  color: #ececec;
   border: 1px silver solid;
-  border-radius: 50%;
   cursor: pointer;
   width: 60px;
-  height: 60px;
-  line-height: 60px;
+  height: 30px;
+  line-height: 30px;
 
   &.topRight {
     top: 1rem;
-    //right: 1rem;
+    right: 15vw;
+    border-radius: 4px 4px 0 0;
+  }
+
+  &.bottomRight {
+    bottom: 0;
+    right: 15vw;
+    border-radius: 4px 4px 0 0;
   }
 }
 

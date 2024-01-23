@@ -11,11 +11,19 @@ class Bot {
   /**
    * @var array
    */
-  private $original;
+  private $originalMessage;
+  /**
+   * @var string
+   */
+  private $host;
   /**
    * @var string
    */
   private $chatId;
+  /**
+   * @var string
+   */
+  private $chatKey;
   /**
    * @var string
    */
@@ -34,15 +42,24 @@ class Bot {
   private $subscribes = null;
 
   private $method = self::METHOD_SEND;
-  private $sendData = ['chat_id' => 1];
+  private $sendData = [
+    'chat_id' => 1,
+    'parse_mode' => 'HTML',
+  ];
+
+  private $errors = [];
 
   public function __construct($data) {
-    $this->original = $data;
+    $message = [];
 
-    $this->chatId   = $data['chat']['id'] ?? '';
-    $this->username = $data['chat']['username'];
-    $this->type     = $data['type'] ?? 'text';
-    $this->content  = $data['text'];
+    if (isset($data['message'])) $message = $data['message'];
+
+    $this->originalMessage = $message;
+
+    $this->host     = $message['host'] ?? '';
+    $this->chatId   = $message['chat']['id'] ?? '';
+    $this->username = $message['chat']['username'] ?? '';
+    $this->type     = $message['type'] ?? 'text';
   }
 
   private function addChatId($id): Bot {
@@ -53,7 +70,29 @@ class Bot {
   }
 
   private function setContent(): Bot {
-    $this->sendData['text'] = $this->content;
+    $host = $this->host;
+    $key = substr($this->originalMessage['chatKey'], -7, 7); // Последние 7 символов
+    $content = $this->getContent();
+
+    $this->sendData['text'] = "Сайт <b>$host</b>:\ $content";
+
+    //def($key);
+
+    //
+    $this->sendData['reply_markup'] = [
+      "inline_keyboard" => [
+        [
+          [
+            "text" => "Х",
+            "callback_data" => "hideBtn"
+          ],
+          [
+            "text" => "Ответить",
+            "switch_inline_query_current_chat" => ">$key<:\n\n"
+          ],
+        ]
+      ]
+    ];
 
     return $this;
   }
@@ -67,25 +106,46 @@ class Bot {
       $result[$id] = httpRequest($url, ['method' => 'post'], json_encode($send));
     }
 
-    def($result);
+    $result = array_filter($result, function ($item) { return $item['ok'] !== true; });
+    if (count($result) !== 0) {
+      def($result, false);
+      $this->errors[] = 'send error';
+    }
   }
 
-  public function getUser(): string {
-    return $this->username;
+  public function getChatKey(): string {
+    if (empty($this->chatKey)) {
+      $match = [];
+      // '....>12345<...' -> '12345'
+      $res = preg_match('/[>](.+)[<]/', $this->originalMessage['text'], $match);
+
+      $this->chatKey = $res === 0 ? '-1' : $match[1];
+    }
+
+    return $this->chatKey;
   }
-  public function getType(): string {
-    return $this->type;
-  }
+  public function getUser(): string { return $this->username; }
+  public function getType(): string { return $this->type; }
   public function getContent(): string {
+    if (empty($this->content)) {
+      $chatKey = $this->getChatKey();
+      $text = $this->originalMessage['text'];
+
+      // '....>12345<:\n\nText..' -> 'Text..'
+      if ($chatKey !== '-1') $text = preg_replace("/^.+>$chatKey<:\n\n/", '', $text);
+
+      $this->content = $text;
+    }
+
     return $this->content;
   }
   public function getAction(): string {
-    $isCommand = ($this->original['entities']['0']['type'] ?? '') === 'bot_command';
+    $isCommand = ($this->originalMessage['entities']['0']['type'] ?? '') === 'bot_command';
 
     if ($isCommand) {
       $match = [];
 
-      $res = preg_match('/^(.?)(\w+)(.?)/', $this->content, $match);
+      $res = preg_match('/^(.?)(\w+)(.?)/', $this->getContent(), $match);
       if ($res === 0) def('getAction: regExp not found');
 
       return $match[2];
@@ -93,6 +153,7 @@ class Bot {
 
     return 'message';
   }
+  public function getError() { return $this->errors; }
 
   private function loadSubscribe() {
     $subscribes = file_get_contents(self::SUBSCRIBE_PATH);
@@ -129,15 +190,21 @@ class Bot {
   }
   public function removeSupportUser() {
     $this->toggleUser();
-    $this->sendData['text'] =  'Подписка отключена';
+    $this->sendData['text'] = 'Подписка отключена';
+    $this->addChatId($this->chatId)->send();
+  }
+  public function sendErrorMessage() {
+    $this->sendData['text'] = '❌: Адресат обязателен';
     $this->addChatId($this->chatId)->send();
   }
 
-  public function sendToBot() {
+  public function sendToBot(): Bot {
     if ($this->subscribes === null) $this->loadSubscribe();
 
     $this->setContent()
          ->addChatId(array_keys($this->subscribes))
          ->send();
+
+    return $this;
   }
 }

@@ -46,9 +46,9 @@ final class Main {
    * @param array $cmsParam
    * @param array $dbConfig
    */
-  public function __construct(array $cmsParam, array $dbConfig) {
+  public function __construct(array $cmsParam) {
     $this->setParam(array_merge($this::PARAM, $cmsParam));
-    $this->setSettings(VC::DB_CONFIG, $dbConfig);
+    $this->setSettings(VC::DB_CONFIG, DB_CONFIG);
 
     $this->request = Request::createFromGlobals();
     $this->response  = new Response();
@@ -67,7 +67,7 @@ final class Main {
 
     $this->response->headers->setCookie(
       new Cookie(
-        'support-user-key', $userKey, time() + 2592000,
+        COOKIE_SUPPORT_KEY, $userKey, time() + 2592000,
         '/', $this->request->getHost()
       )
     );

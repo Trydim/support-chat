@@ -13,7 +13,7 @@ class SupportBtn {
     this.onEvent();
   }
 
-  createBtn(position = POSITION[1]) {
+  createBtn(position = POSITION[3]) {
     const wrap  = document.createElement('div'),
           style = document.createElement('style'),
           btn   = document.createElement('div');

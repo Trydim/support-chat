@@ -98,7 +98,7 @@ class Db extends R {
    * @param string $key
    * @return $this
    */
-  public function selectDb(string $key): DbMain {
+  public function selectDb(string $key): Db {
     self::selectDatabase($key);
 
     return $this;
@@ -225,8 +225,8 @@ class Db extends R {
       // Сохранить файл
     }
 
-    $bean->chatKey = $cookies->get('support-user-key');
-    $bean->userKey = $cookies->get('support-user-key');
+    $bean->chatKey = $cookies->get(COOKIE_SUPPORT_KEY);
+    $bean->userKey = $cookies->get(COOKIE_SUPPORT_KEY);
     $bean->type    = $type;
     $bean->content = $request->get('content');
 
@@ -236,7 +236,8 @@ class Db extends R {
   public function addTGMessage(string $chatKey, string $userKey, string $type, string $content): array {
     $this->checkConnection();
 
-    $bean = R::dispense('messages');
+    $bean = self::dispense('messages');
+    $chatKey = self::findOne('messages', ' chat_key LIKE ? ', ["%$chatKey%"])->chatKey;
 
     if ($type === 'file') {
       // Сохранить файл
@@ -257,7 +258,7 @@ class Db extends R {
     $cookies = $this->main->request->cookies;
 
     $sql = "SELECT id, user_key AS userKey, date, type, content FROM messages";
-    $sql .= " WHERE chat_key = '" . $cookies->get('support-user-key') . "'";
+    $sql .= " WHERE chat_key = '" . $cookies->get(COOKIE_SUPPORT_KEY) . "'";
 
     return R::getAll($sql);
   }

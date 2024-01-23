@@ -3,14 +3,7 @@
 require __DIR__ . '/php/libs/vendor/autoload.php';
 require __DIR__ . '/php/app.php';
 
-$main = new Main([
-  'DEBUG' => true,
-], [
-  'dbHost'     => 'localhost',
-  'dbName'     => 'support',
-  'dbUsername' => 'root',
-  'dbPass'     => ''
-]);
+$main = new Main(['DEBUG' => true]);
 
 $result = [];
 $action = $main->getParam('action');
@@ -20,15 +13,17 @@ switch ($action) {
     //$result = $main->db->
     break;
   case 'addMessage':
-    $request = $main->request->request;
-
+    $request = $main->request;
     $result = $main->db->addMessage();
 
-    (new Bot([
-      'type' => $request->get('type') ?? 'text',
-      'text' => $request->get('content'),
-    ]))->sendToBot();
+    $data = [
+      'host'    => $request->server->get('HTTP_HOST'),
+      'chatKey' => $request->cookies->get(COOKIE_SUPPORT_KEY),
+      'type'    => $request->request->get('type'),
+      'text'    => $request->request->get('content'),
+    ];
 
+    $result['error'] = (new Bot(['message' => $data]))->sendToBot()->getError();
     break;
   case 'loadMessages':
     $result['data']    = $main->db->loadMessages();

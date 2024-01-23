@@ -12,8 +12,8 @@ const checkJSON = (data) => {
   }
   catch (e) {
     const msg = e['xdebug_message'] || e.message || e;
-    //msg && f.showMsg(msg, 'error', false);
-    //data && f.showMsg(data, 'error', false);
+    msg && console.error(msg);
+    data && console.error(data);
     return {status: false};
   }
 };
@@ -56,7 +56,9 @@ const query = (url, body, type = 'json') => {
 
     if (typeof body === 'object') {
       Object.entries(body).forEach(([k, v]) => {
-        v && data.set(k, typeof v === 'object' ? JSON.stringify(v) : v.toString());
+        if (!v) return;
+        if (v instanceof Blob) data.append(k, v, v.name);
+        else data.set(k, typeof v === 'object' ? JSON.stringify(v) : v.toString());
       });
     }
     else data.set('content', body);

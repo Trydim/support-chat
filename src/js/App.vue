@@ -4,11 +4,11 @@
 
     <Dialog v-model:visible="visible" header="Поддержка"
             :style="{ width: '50rem' }"
-            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :position="position" :modal="true" :draggable="false">
+            :breakpoints="{ '1199px': '75vw', '575px': '90vw' }" :position="position.toLowerCase()" :modal="true" :draggable="false">
 
       <div class="chat-messages">
         <div v-for="(item, index) of content" :key="index" class="message-box-holder">
-          <div v-if="!item.author" class="message-sender">Try</div>
+          <div v-if="!item.author" class="message-sender">Оператор</div>
           <div class="message-box" :class="{'message-partner': !item.author}">{{ item.content }}</div>
         </div>
       </div>
@@ -46,10 +46,7 @@
       </div>-->
 
       <template #footer>
-        <div class="chat-input-holder">
-          <textarea class="chat-input" v-model="message"></textarea>
-          <input type="submit" class="message-send" value="Send" @click="send">
-        </div>
+        <dialog-footer v-model="message" @send="send"></dialog-footer>
       </template>
     </Dialog>
   </div>
@@ -61,14 +58,17 @@ import {DEBUG, POSITION, SYNC_DELAY, SYNC_INTERVAL} from "./const";
 import query from "./libs/query";
 
 import Dialog from 'primevue/dialog';
+import DialogFooter from "./components/footer";
 
 export default {
   name: 'support-app',
-  components: {Dialog},
+  components: {
+    DialogFooter,
+    Dialog},
   data: () => ({
     userKey: undefined,
     visible: false,
-    position: 'topright',
+    position: POSITION[3],
 
     content: [],
     message: '',
@@ -93,7 +93,7 @@ export default {
           author: item.userKey === this.userKey,
           date  : item.date,
           content: item.content,
-        }
+        };
       });
     },
     loadMessages(date) {
@@ -113,25 +113,27 @@ export default {
       setTimeout(() => this.stopSync(), SYNC_DELAY);
     },
     stopSync() { clearInterval(this.syncInterval) },
+    restartSync() {
+      this.stopSync();
+      this.startSync();
+    },
 
-    send() {
-      const content = this.message;
-      this.message = '';
-
-      // блокировать кнопку отправить
+    send(finish) {
+      this.restartSync();
 
       query.Post({
         data: {
           action: 'addMessage',
-          content,
+          type: this.message instanceof Blob ? 'file' : 'text',
+          content: this.message,
         }
       }).then(d => {
-        if (d['status'])this.content.push({
+        if (d['status']) this.content.push({
           author: true,
           date  : new Date().toLocaleString('ru'),
-          content,
+          content: this.message,
         });
-      })
+      }).finally(finish);
     }
   },
   mounted() {
