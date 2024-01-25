@@ -30,7 +30,7 @@ function httpRequest(string $url, array $config = [], $params = []) {
 
   if (strtolower($config['method'] ?? 'get') === 'get') {
     $curlConfig[CURLOPT_HTTPGET] = true;
-    $curlConfig[CURLOPT_URL] .= '?' . http_build_query($params);
+    !empty($params) && $curlConfig[CURLOPT_URL] .= '?' . http_build_query($params);
   } else {
     $curlConfig[CURLOPT_HTTPGET] = false;
     $curlConfig[CURLOPT_POST] = true;

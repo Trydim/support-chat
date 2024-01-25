@@ -1,16 +1,32 @@
 .vis-support-btn {
   position: fixed;
-  background: grey;
-  color: #ececec;
-  border: 1px silver solid;
-  cursor: pointer;
-  width: 60px;
+  background: #e2f5ff;
+  width: 70px;
   height: 30px;
   line-height: 30px;
+  text-align: center;
+  cursor: pointer;
+  z-index: 100;
+
+  &:hover {
+    box-shadow: 0 0 5px 1px #93a7b0;
+  }
+
+  &.topLeft {
+    top: 0;
+    left: 15vw;
+    border-radius: 4px 4px 0 0;
+  }
 
   &.topRight {
-    top: 1rem;
+    top: 0;
     right: 15vw;
+    border-radius: 4px 4px 0 0;
+  }
+
+  &.bottomLeft {
+    bottom: 0;
+    left: 15vw;
     border-radius: 4px 4px 0 0;
   }
 

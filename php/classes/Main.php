@@ -5,21 +5,6 @@ use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 final class Main {
-  /*use Authorization;
-  use Dictionary;
-  use Cache;
-  use Hooks;
-  use Utilities;*/
-
-  /**
-   * @var array - global Cms param
-   */
-  const PARAM = [
-    'PROJECT_TITLE' => 'Project title',
-  ];
-
-  //const SETTINGS_PATH = SHARE_PATH . 'settingSave.json';
-
   /**
    * @var array
    */
@@ -28,26 +13,31 @@ final class Main {
   /**
    * @var array
    */
-  private $cmsParam = [];
+  private $param = [];
 
   /**
    * @var boolean
    */
   public $frontSettingInit = false;
-
+  /**
+   * @var Request
+   */
+  public $request;
+  /**
+   * @var Response
+   */
   public $response;
   /**
-   * @var DbMain
+   * @var Db
    */
   public $db;
 
+
   /**
    * Main constructor.
-   * @param array $cmsParam
-   * @param array $dbConfig
+   * @param array $param
    */
-  public function __construct(array $cmsParam) {
-    $this->setParam(array_merge($this::PARAM, $cmsParam));
+  public function __construct(array $param) {
     $this->setSettings(VC::DB_CONFIG, DB_CONFIG);
 
     $this->request = Request::createFromGlobals();
@@ -60,15 +50,22 @@ final class Main {
   }
 
   private function updateUniqueKey() {
-    $userKey = $this->request->cookies->get('support-user-key');
+    $userKey = $this->request->request->get(COOKIE_SUPPORT_KEY);
+    $userKey = $userKey ?? $this->request->cookies->get('support-user-key');
     $userKey = $userKey ?? uniqid('', true);
 
+    //def('null');
+
     $this->setParam('userKey', $userKey);
+
+    // https:// http:// заменить или нет?
+
+    $this->setParam(COOKIE_SUPPORT_KEY, $userKey);
 
     $this->response->headers->setCookie(
       new Cookie(
         COOKIE_SUPPORT_KEY, $userKey, time() + 2592000,
-        '/', $this->request->getHost()
+        '/', $this->request->server->get('HTTP_ORIGIN'), null, false
       )
     );
   }
@@ -82,38 +79,32 @@ final class Main {
   --------------------------------------------------------------------------------------------------------------------*/
 
   /**
-   * setCmsSetting from config
-   * @param string[]|string $param
+   * Set param
+   * @param string[]|string $key
    * @param $value
    *
    * @return Main
    */
-  public function setParam($param, $value = null): Main {
-    if (is_array($param)) {
-      array_walk($param, function ($item, $key) {
-        $this->cmsParam[$key] = $item;
+  public function setParam($key, $value = null): Main {
+    if (is_array($key)) {
+      array_walk($key, function ($item, $key) {
+        $this->param[$key] = $item;
       });
     }
 
     else if ($value !== null) {
-      $this->cmsParam[$param] = $value;
+      $this->param[$key] = $value;
     }
 
     return $this;
   }
 
   /**
-   * @param string $param
-   * @return mixed|string|null
+   * @param string $key
+   * @return mixed
    */
-  public function getParam(string $param) {
-    $param = explode('.', $param);
-
-    if (count($param) === 1) {
-      return $this->cmsParam[$param[0]] ?? null;
-    } else {
-      return $this->cmsParam[$param[0]][$param[1]] ?? null;
-    }
+  public function getParam(string $key) {
+    return $this->param[$key] ?? null;
   }
 
   /* -------------------------------------------------------------------------------------------------------------------
@@ -133,14 +124,6 @@ final class Main {
       $setting = json_decode(file_get_contents($settingPath), true);
     }
 
-    $settingPath = $this->url->getBasePath(true) . self::SETTINGS_PATH;
-    if ($this->isDealer()) {
-      $mainSetting = json_decode(file_get_contents($settingPath), true);
-      $setting[VC::OPTION_PROPERTIES] = $mainSetting[VC::OPTION_PROPERTIES] ?? [];
-      $setting[VC::DEALER_PROPERTIES] = $mainSetting[VC::DEALER_PROPERTIES] ?? [];
-    }
-
-    $this->setting = array_merge($this->setting, $setting);
     return $this;
   }*/
 

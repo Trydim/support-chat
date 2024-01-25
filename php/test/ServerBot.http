@@ -20,14 +20,26 @@ Content-Type: application/json
 {"update_id":222027477,"message":{"message_id":57,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1705962964,"text":"test 54456"}}
 
 
+### Пустое сообщение - ничего не делать
+POST http://supportchat/bot.php
+Content-Type: application/json
+
+{"update_id":222027554, "message":{"message_id":185,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706093662,"text":"@vistegra_support_bot >4487345<:","entities":[{"offset":0,"length":21,"type":"mention"}]}}
+
+### Кнопка X - удалить кнопки
+POST http://supportchat/bot.php
+Content-Type: application/json
+
+{"update_id":222027555,"callback_query":{"id":"3926178866234379354","from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"message":{"message_id":182,"from":{"id":6985649319,"is_bot":true,"first_name":"vistegra_support_bot","username":"vistegra_support_bot"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706093501,"text":"\u0421\u0430\u0439\u0442 vistegra.by:\\ \u0411\u044d\u043d, \u0430\u0439 \u043d\u0438\u0434 \u0445\u0435\u043b\u043f","entities":[{"offset":5,"length":11,"type":"url"},{"offset":5,"length":11,"type":"bold"}],"reply_markup":{"inline_keyboard":[[{"text":"\u0425","callback_data":"hideBtn"},{"text":"\u041e\u0442\u0432\u0435\u0442\u0438\u0442\u044c","switch_inline_query_current_chat":">8630051<:\n\n"}]]}},"chat_instance":"8381397085471239683","data":"hideBtn"}}
+
 ### Кнопка ответить
 POST http://supportchat/bot.php
 Content-Type: application/json
 
 {"update_id":222027522,"message":{"message_id":109,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706008792,"text":"@vistegra_support_bot >4487345<:\n\ntest with target","entities":[{"offset":0,"length":21,"type":"mention"}]}}
 
-###
-POST http://support-chat/bot.php
+### Отправка картинки с подписью
+POST http://supportchat/bot.php
 Content-Type: application/json
 
-{"update_id":222027549,"message":{"message_id":175,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706050582,"photo":[{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAANzAAM0BA","file_unique_id":"AQADcdwxG68cgEl4","file_size":920,"width":90,"height":74},{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAANtAAM0BA","file_unique_id":"AQADcdwxG68cgEly","file_size":10108,"width":320,"height":262},{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAAN4AAM0BA","file_unique_id":"AQADcdwxG68cgEl9","file_size":12568,"width":408,"height":334}],"caption":"@vistegra_support_bot >4427007<:\n\ntest test","caption_entities":[{"offset":0,"length":21,"type":"mention"}]}}
+{"update_id":222027549,"message":{"message_id":175,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706050582,"photo":[{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAANzAAM0BA","file_unique_id":"AQADcdwxG68cgEl4","file_size":920,"width":90,"height":74},{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAANtAAM0BA","file_unique_id":"AQADcdwxG68cgEly","file_size":10108,"width":320,"height":262},{"file_id":"AgACAgIAAxkBAAOzZbDimasTESF-0UlxdnEbFfI1npMAAnXQMRvCB4hJoZpQGfYd7UYBAAMCAAN4AAM0BA","file_unique_id":"AQADcdwxG68cgEl9","file_size":12568,"width":408,"height":334}],"caption":"@vistegra_support_bot >4487345<:\n\ntest test","caption_entities":[{"offset":0,"length":21,"type":"mention"}]}}

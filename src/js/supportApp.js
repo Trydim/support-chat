@@ -1,7 +1,7 @@
 'use strict';
 
 //import appStyle from 'primevue/resources/themes/bootstrap4-light-blue/theme.css';
-import styleApp from '../css/styleApp.css';
+import styleApp from '../css/styleApp.scss';
 import DialogStyle from 'primevue/dialog/style/dialogstyle.esm';
 
 import { createApp } from 'vue';

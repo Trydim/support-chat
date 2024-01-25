@@ -13,7 +13,7 @@ class SupportBtn {
     this.onEvent();
   }
 
-  createBtn(position = POSITION[3]) {
+  createBtn(position = POSITION[2]) {
     const wrap  = document.createElement('div'),
           style = document.createElement('style'),
           btn   = document.createElement('div');
@@ -33,7 +33,7 @@ class SupportBtn {
 
   loadScript() {
     const script = document.createElement('script');
-    script.src = MAIN_URL + 'supportApp.js';
+    script.src = MAIN_URL + 'supportApp.js?ver=' + (Math.random() * 1000 | 0);
 
     document.body.append(script);
     this.scriptLoaded = true;

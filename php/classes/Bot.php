@@ -8,16 +8,22 @@ class Bot {
   const SUBSCRIBE_PATH = __DIR__ . '/../../storage/subscribeList.json';
   const UPLOAD_PATH    = __DIR__ . '/../../storage/upload/';
 
-  const METHOD_SEND = 'sendMessage';
+  const SEND_ERROR_TG = [
+    '1' => '❌: Адресат обязателен',
+    '2' => '❌: Адресат недоступен',
+    '3' => '❌: Серверу не удалось загрузить файл',
+  ];
 
   /**
-   * @var array
+   * @var object
    */
-  private $originalMessage;
+  private $original;
+
   /**
-   * @var array
+   * @var object
    */
-  private $originalFile;
+  private $data;
+
   /**
    * @var string
    */
@@ -26,6 +32,10 @@ class Bot {
    * @var string
    */
   private $chatId;
+  /**
+   * @var string
+   */
+  private $msgId;
   /**
    * @var string
    */
@@ -47,7 +57,11 @@ class Bot {
 
   private $subscribes = null;
 
-  private $method = self::METHOD_SEND;
+  /**
+   * @var 'message'|'start'|'stop'|'error'
+   */
+  private $action;
+  private $method = 'sendMessage';
   private $sendData = [
     'chat_id' => 1,
     'parse_mode' => 'HTML',
@@ -55,22 +69,61 @@ class Bot {
 
   private $errors = [];
 
-  public function __construct($data) {
-    $message = [];
-    $file    = [];
-    $type    = 'text';
+  public function __construct(array $data, bool $check = true) {
+    $this->original = new class {
+      var $message = [];
+      var $file = [];
+      var $callback = [];
+    };
+    $this->data = new class {};
 
-    if (array_key_exists('message', $data)) $message = $data['message'];
-    if (array_key_exists('photo', $message)) { $file = $message['photo']; $type = 'file'; }
-    if (array_key_exists('caption', $message)) $message['text'] = $message['caption'];
+    $data = $this->checkKeyCallBack($data);
 
-    $this->originalMessage = $message;
-    $this->originalFile    = $file;
+    $message = $data['message'];
+    if (array_key_exists('photo', $message)) {
+      $this->original->file = $message['photo'];
 
-    $this->host     = $message['host'] ?? '';
-    $this->chatId   = $message['chat']['id'] ?? '';
-    $this->username = $message['chat']['username'] ?? '';
-    $this->type     = $type;
+      if (array_key_exists('caption', $message)) $message['text'] = $message['caption'];
+    }
+
+    $this->original->message = $message;
+
+    $this->host   = $message['host'] ?? '';
+    $this->msgId  = $message['message_id'] ?? '';
+    $this->chatId = $message['chat']['id'] ?? '';
+    $this->type   = $message['type'] ?? null;
+
+    $check && $this->checkRequirements();
+  }
+
+  private function checkKeyCallBack(array $data): array {
+    if (!array_key_exists('callback_query', $data)) return $data;
+
+    $callback = $data['callback_query'];
+
+    $this->original->callback = $callback;
+    $this->data->callbackAction = $callback['data'];
+
+    return $callback;
+  }
+  private function checkRequirements() {
+    $action = $this->getAction();
+
+    if ($action === 'callback') return;
+
+    // Для сообщений должен быть адресат
+    if ($action === 'message' && $this->getChatKey() === '-1') {
+      $this->sendErrorMessage(1); return;
+    }
+
+    // Сообщение не содержит текста
+    if ($this->getType() === 'text' && empty($this->getContent())) {
+      $this->method = 'deleteMessage';
+      $this->sendData['message_id'] = $this->msgId;
+      $this->addChatId($this->chatId)->send();
+      $this->action = 'error';
+      return;
+    }
   }
 
   private function addChatId($id): Bot {
@@ -80,9 +133,31 @@ class Bot {
     return $this;
   }
 
+  private function getContentFilePath(): string {
+    $index = count($this->original->file) - 1;
+    $file  = $this->original->file[$index];
+
+    $result = httpRequest(self::URL_TELEGRAM . self::TOKEN_TELEGRAM . '/getFile?file_id=' . $file['file_id']);
+    if (!$result['ok']) def('getContentFilePath error', false);
+
+    return $result['result']['file_path'] ?? '';
+  }
+  private function copyContentFile(): string {
+    $file = $this->getContentFilePath();
+    $localFile = uniqid() . '.' . pathinfo($file, PATHINFO_EXTENSION);
+
+    $from = self::URL_FILE_TELEGRAM . self::TOKEN_TELEGRAM . '/' . $file;
+    $to   = self::UPLOAD_PATH . $localFile;
+
+    $result = copy($from, $to);
+    if (!$result) def('getContentFilePath error', false);
+
+    return $result ? $localFile : '';
+  }
+
   private function setContent(): Bot {
     $host = $this->host;
-    $key = substr($this->originalMessage['chatKey'], -7, 7); // Последние 7 символов
+    $key = substr($this->original->message['chatKey'], -7, 7); // Последние 7 символов
     $type = $this->getType();
     $content = $this->getContent();
 
@@ -133,67 +208,71 @@ class Bot {
   }
 
   public function getChatKey(): string {
-    if (empty($this->chatKey)) {
+    if ($this->chatKey === null) {
       $match = [];
       // '....>12345<...' -> '12345'
-      $res = preg_match('/[>](.+)[<]/', $this->originalMessage['text'], $match);
+      $res = preg_match('/[>](.+)[<]/', $this->original->message['text'], $match);
 
       $this->chatKey = $res === 0 ? '-1' : $match[1];
     }
 
     return $this->chatKey;
   }
-  public function getUser(): string { return $this->username; }
-  public function getType(): string { return $this->type; }
+  public function getUser(): string {
+    if ($this->username === null) {
+      $this->username = $this->original->message['chat']['username'] ?? '';
+    }
+
+    return $this->username;
+  }
+  public function getType(): string {
+    if ($this->type === null) {
+      $this->type = array_key_exists('photo', $this->original->message) ? 'file' : 'text';
+    }
+
+    return $this->type;
+  }
   public function getContent(): string {
-    if (empty($this->content)) {
+    if ($this->content === null) {
       $chatKey = $this->getChatKey();
-      $text = $this->originalMessage['text'];
+      $text = $this->original->message['text'];
 
       // '....>12345<:\n\nText..' -> 'Text..'
-      if ($chatKey !== '-1') $text = preg_replace("/^.+>$chatKey<:\n\n/", '', $text);
+      if ($chatKey !== '-1') $text = preg_replace("/^.+>$chatKey<:/", '', $text);
 
-      $this->content = $text;
+      $this->content = trim($text);
     }
 
     return $this->content;
   }
-  public function getFileContent(): string {
-    $index = count($this->originalFile) - 1;
-    $file  = $this->originalFile[$index];
+  public function getContentFileUri(): string {
+    $url = $_SERVER['HTTP_HOST'] === 'vistegra.by' ? SUPPORT_HOST : 'http://' . $_SERVER['HTTP_HOST'] . '/';
 
-    $result = httpRequest(self::URL_TELEGRAM . self::TOKEN_TELEGRAM . '/getFile?file_id=' . $file['file_id']);
-    if (!$result['ok']) def('getFileContent error', false);
-
-    //$url = $_SERVER['HTTP_HOST'] === 'vistegra.by' ? SUPPORT_HOST : $_SERVER['HTTP_REFERER'];
-    $url = SUPPORT_HOST;
-
-    $file = $result['result']['file_path'];
-    $localFile = uniqid() . '.' . pathinfo($file, PATHINFO_EXTENSION);
-
-    $from = self::URL_FILE_TELEGRAM . self::TOKEN_TELEGRAM . '/' . $file;
-    $to   = self::UPLOAD_PATH . $localFile;
-    $result = copy($from, $to);
-    if (!$result) def('getFileContent error', false);
+    $localFile = $this->copyContentFile();
+    if (empty($localFile)) { def('getContentFilePath error', false); return ''; }
 
     return $url . 'storage/upload/' . $localFile;
   }
   public function getAction(): string {
-    $isCommand = ($this->originalMessage['entities']['0']['type'] ?? '') === 'bot_command';
+    if ($this->action === null) {
+      if (isset($this->data->callbackAction)) $this->action = 'callback';
+      else {
+        $isCommand = ($this->original->message['entities']['0']['type'] ?? '') === 'bot_command';
 
-    if ($isCommand) {
-      $match = [];
+        if ($isCommand) {
+          $match = [];
 
-      $res = preg_match('/^(.?)(\w+)(.?)/', $this->getContent(), $match);
-      if ($res === 0) def('getAction: regExp not found');
+          $res = preg_match('/^(.?)(\w+)(.?)/', $this->getContent(), $match);
+          if ($res === 0) def('getAction: regExp not found');
 
-      return $match[2];
+          $this->action = $match[2];
+        } else $this->action = 'message';
+      }
     }
 
-    return 'message';
+    return $this->action;
   }
   public function getError(): array { return $this->errors; }
-
 
   private function loadSubscribe() {
     $subscribes = file_get_contents(self::SUBSCRIBE_PATH);
@@ -233,11 +312,23 @@ class Bot {
     $this->sendData['text'] = 'Подписка отключена';
     $this->addChatId($this->chatId)->send();
   }
-  public function sendErrorMessage() {
-    $this->sendData['text'] = '❌: Адресат обязателен';
+  public function sendErrorMessage($msg = null) {
+    $this->action = 'error';
+    $this->sendData['text'] = is_integer($msg) ? self::SEND_ERROR_TG[$msg ?? 1] : $msg;
     $this->addChatId($this->chatId)->send();
   }
 
+  public function execCallBack() {
+    switch ($this->data->callbackAction) {
+      default: break;
+      case 'hideBtn':
+        $this->method = 'editMessageReplyMarkup';
+        $this->sendData['message_id'] = $this->msgId;
+        $this->sendData['reply_markup'] = [];
+        $this->addChatId($this->chatId)->send();
+        break;
+    }
+  }
   public function sendToBot(): Bot {
     if ($this->subscribes === null) $this->loadSubscribe();
 

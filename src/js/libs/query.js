@@ -49,7 +49,9 @@ const downloadBody = async (data) => {
 }
 
 const query = (url, body, type = 'json') => {
-  const headers = {'Cookie': document.cookie};
+  const headers = {
+    'Cookie': document.cookie,
+  };
 
   if (body && ['object', 'string'].includes(typeof body) && !(body instanceof FormData)) {
     let data = new FormData();
@@ -62,6 +64,9 @@ const query = (url, body, type = 'json') => {
       });
     }
     else data.set('content', body);
+
+    const v = localStorage.getItem('support-user-key');
+    if (v && v !== 'null') data.set('support-user-key', v);
 
     body = data;
   }

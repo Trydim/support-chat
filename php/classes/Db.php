@@ -52,9 +52,8 @@ class Db extends R {
   }
 
 
-  public function __construct(Main $main, bool $freeze = true) {
+  public function __construct(Main $main) {
     $this->main = $main;
-
   }
 
   private function checkConnection() {
@@ -140,7 +139,7 @@ class Db extends R {
 
   //------------------------------------------------------------------------------------------------------------------
 
-  public function addMessage(): array {
+  public function addMessage(string $supportKey): array {
     $this->checkConnection();
 
     $request = $this->main->request;
@@ -155,8 +154,8 @@ class Db extends R {
       $content = $fs->prepareFile($request->files->get('content'))->getUri();
     }
 
-    $bean->chatKey = $cookies->get(COOKIE_SUPPORT_KEY);
-    $bean->userKey = $cookies->get(COOKIE_SUPPORT_KEY);
+    $bean->chatKey = $supportKey ?? $cookies->get(COOKIE_SUPPORT_KEY);
+    $bean->userKey = $supportKey ?? $cookies->get(COOKIE_SUPPORT_KEY);
     $bean->type    = $type;
     $bean->content = $content;
 
@@ -164,25 +163,36 @@ class Db extends R {
     return ['id' => R::store($bean)];
   }
 
-  public function addTGMessage(Bot $bot): array {
+  public function addMessageFromTG(Bot $bot): array {
     $this->checkConnection();
 
     $bean = self::dispense('messages');
     $chatKey = $bot->getChatKey();
-    $chatKey = self::findOne('messages', ' chat_key LIKE ? ', ["%$chatKey%"])->chatKey;
     $user    = $bot->getUser();
+
+    $chatKey = self::findOne('messages', ' chat_key LIKE ? ', ["%$chatKey%"])->chatKey;
+    if (empty($chatKey)) {
+      $bot->sendErrorMessage(2);
+      return ['id' => false];
+    }
+
+    if ($bot->getType() === 'file') {
+      $bean->chatKey = $chatKey;
+      $bean->userKey = $user;
+      $bean->type    = 'file';
+      $bean->content = $bot->getContentFileUri();
+
+      if (empty($bean->content)) {
+        $bot->sendErrorMessage(3);
+        return ['id' => false];
+      }
+
+      R::store($bean);
+      $bean = self::dispense('messages');
+    }
 
     $bean->chatKey = $chatKey;
     $bean->userKey = $user;
-
-    if ($bot->getType() === 'file') {
-      $bean->type    = 'file';
-      $bean->content = $bot->getFileContent();
-
-      $r = R::store($bean);
-      if ($r === 0) def('error');
-    }
-
     $bean->type    = 'text';
     $bean->content = $bot->getContent();
 
@@ -190,13 +200,16 @@ class Db extends R {
   }
 
   // Добавить аргумент загрузки по времени
-  public function loadMessages(): array {
+  public function loadMessages($supportKey): array {
     $this->checkConnection();
 
     $cookies = $this->main->request->cookies;
+    //$date = $this->main->request->request->get('date');
 
     $sql = "SELECT id, user_key AS userKey, date, type, content FROM messages";
-    $sql .= " WHERE chat_key = '" . $cookies->get(COOKIE_SUPPORT_KEY) . "'";
+    $sql .= " WHERE chat_key = '" . ($supportKey ?? $cookies->get(COOKIE_SUPPORT_KEY)) . "'";
+
+    //if ($date) $sql .= " AND date > '" . date(self::DB_DATE_FORMAT, $date) . "'";
 
     return R::getAll($sql);
   }
