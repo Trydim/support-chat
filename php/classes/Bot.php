@@ -88,7 +88,7 @@ class Bot {
 
     $this->original->message = $message;
 
-    $this->host   = $message['host'] ?? '';
+    $this->host   = $message['host'] ?? null;
     $this->msgId  = $message['message_id'] ?? '';
     $this->chatId = $message['chat']['id'] ?? '';
     $this->type   = $message['type'] ?? null;
@@ -159,10 +159,11 @@ class Bot {
     $host = $this->host;
     $key  = substr($this->getChatKey(), -7, 7); // Последние 7 символов
     $type = $this->getType();
-    $content = $this->getContent();
+    $content = htmlspecialchars($this->getContent());
 
     if ($type === 'text') {
-      $this->sendData['text'] = "Сайт <b>$host</b>:\ $content";
+      $this->sendData['text'] = $host ? "Сайт <b>$host</b>:\n$content"
+                                      : $this->getUser() . ":\n$content";
     } else {
       // Определить тип файла
       $fileType = pathinfo($content, PATHINFO_EXTENSION);
@@ -196,7 +197,7 @@ class Bot {
     $send = $this->sendData;
 
     foreach ($this->sendChatId as $id) {
-      if ($this->chatId === $id) continue; // Самому себе не отправлять
+      if ($this->action !== 'error' && $this->chatId === $id) continue; // Самому себе не отправлять
       $send['chat_id'] = $id;
       $result[$id] = httpRequest($url, ['method' => 'post'], json_encode($send));
     }

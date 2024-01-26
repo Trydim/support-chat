@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div @click="open">Помощь</div>
+    <v-button @click="open"></v-button>
 
     <Dialog v-model:visible="visible" ref="dialog" :style="dialogStyle"
             :position="position.toLowerCase()"
@@ -40,10 +40,12 @@ import DialogFooter from "./components/footer";
 import LeftBorder from "./components/leftBorder";
 import RightBorder from "./components/rightBorder";
 import ChatMessages from "./components/chatMessages";
+import VButton from "./components/button";
 
 export default {
   name: 'support-app',
   components: {
+    VButton,
     ChatMessages,
     DialogHeader,
     LeftBorder, RightBorder,
@@ -78,7 +80,7 @@ export default {
 
     scrollChat() {
       setTimeout(() => {
-        const n = this.$refs['msgContent'].lastElementChild;
+        const n = this.$refs['msgContent'].$el.lastElementChild;
         n && n.scrollIntoView();
       }, 300);
     },
@@ -134,7 +136,7 @@ export default {
       }).then(d => {
         if (d['status']) this.addContent([{
           userKey: this.userKey,
-          date: new Date().toLocaleString('ru'),
+          date: new Date().toISOString(),
           type,
           content: type === 'file' ? URL.createObjectURL(this.sendData) : this.sendData,
         }]);

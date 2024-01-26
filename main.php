@@ -14,8 +14,8 @@ switch ($action) {
     $result['msgId'] = $main->db->addMessage();
 
     $data = [
-      'host'    => $request->server->get('HTTP_HOST'),
-      'chatKey' => $request->request->get(STORAGE_SUPPORT_KEY),
+      'host'    => $request->server->get('HTTP_ORIGIN'),
+      'chatKey' => $main->getParam(STORAGE_SUPPORT_KEY),
       'type'    => $request->request->get('type'),
       'text'    => $main->getParam('content'),
     ];

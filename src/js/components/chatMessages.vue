@@ -29,7 +29,7 @@ export default {
     getChatDate(date) {
       let r;
 
-      date = new Date(Date.parse(date)).toLocaleString();
+      date = new Date(Date.parse(date.replace(',', ''))).toLocaleString();
       r = date.slice(0, 10);
 
       return this.today === r ? date.slice(12) : date;
