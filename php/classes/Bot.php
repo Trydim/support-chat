@@ -157,7 +157,7 @@ class Bot {
 
   private function setContent(): Bot {
     $host = $this->host;
-    $key = substr($this->original->message['chatKey'], -7, 7); // Последние 7 символов
+    $key  = substr($this->getChatKey(), -7, 7); // Последние 7 символов
     $type = $this->getType();
     $content = $this->getContent();
 
@@ -196,6 +196,7 @@ class Bot {
     $send = $this->sendData;
 
     foreach ($this->sendChatId as $id) {
+      if ($this->chatId === $id) continue; // Самому себе не отправлять
       $send['chat_id'] = $id;
       $result[$id] = httpRequest($url, ['method' => 'post'], json_encode($send));
     }
@@ -210,10 +211,10 @@ class Bot {
   public function getChatKey(): string {
     if ($this->chatKey === null) {
       $match = [];
-      // '....>12345<...' -> '12345'
-      $res = preg_match('/[>](.+)[<]/', $this->original->message['text'], $match);
+      $res = preg_match('/[>](.+)[<]/', $this->original->message['text'], $match); // '....>12345<...' -> '12345'
+      $res = $res === 1 ? $match[1] : $this->original->message['chatKey'] ?? '-1';
 
-      $this->chatKey = $res === 0 ? '-1' : $match[1];
+      $this->chatKey = $res;
     }
 
     return $this->chatKey;
@@ -290,7 +291,7 @@ class Bot {
   private function toggleUser(bool $addUser = false) {
     if ($this->subscribes === null) $this->loadSubscribe();
 
-    if ($addUser) $this->subscribes[$this->chatId] = $this->username;
+    if ($addUser) $this->subscribes[$this->chatId] = $this->getUser();
     else unset($this->subscribes[$this->chatId]);
 
     $this->saveSubscribe();
@@ -299,10 +300,10 @@ class Bot {
   public function addSupportUser() {
     // Проверить есть ли такой пользователь
     if ($this->checkUser()) {
-      $this->sendData['text'] = 'Пользователь ' . $this->username . ' уже подписан.';
+      $this->sendData['text'] = 'Пользователь ' . $this->getUser() . ' уже подписан.';
     } else {
       $this->toggleUser(true);
-      $this->sendData['text'] = 'Подписан пользователь: ' . $this->username;
+      $this->sendData['text'] = 'Подписан пользователь: ' . $this->getUser();
     }
 
     $this->addChatId($this->chatId)->send();

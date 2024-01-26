@@ -41,7 +41,7 @@ ul {
 .chat-content {
   position: relative;
 
-  .left-border {
+  .left-border, .right-border {
     position: absolute;
     top: 0;
     width: 5px;
@@ -52,6 +52,8 @@ ul {
       background: #fdfdfd;
     }
   }
+
+  .right-border { right: 0; }
 
   .p-image-preview-indicator {
     width: 80%;
@@ -88,6 +90,7 @@ ul {
   background: #E2F5FF;
   color: #3D3D3D;
   max-width: 95%;
+  overflow-wrap: break-word;
 }
 
 .message-img img {

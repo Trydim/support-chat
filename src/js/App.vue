@@ -17,15 +17,8 @@
 
       <div class="chat-content">
         <left-border :node="$refs.dialog" @drag="dragSize"></left-border>
-        <div ref="msgContent" class="chat-messages">
-          <div v-for="(item, index) of content" :key="index"
-               class="message-box-holder" :class="{'message-right': item.author}">
-            <div v-if="item.type === 'text'" class="message-box">{{ item.content }}</div>
-
-            <VImage v-else class="message-img" :src="item.content" alt="Image" preview></VImage>
-            <div class="message-info">{{ item.author ? '' : 'Специалист' }}, {{ item.date }}</div>
-          </div>
-        </div>
+        <right-border :node="$refs.dialog" @drag="dragSize"></right-border>
+        <chat-messages ref="msgContent" :content="content"></chat-messages>
       </div>
 
       <template #footer>
@@ -37,30 +30,33 @@
 
 <script>
 
-import {DEBUG, POSITION, SYNC_DELAY, SYNC_INTERVAL} from "./const";
+import {DEBUG, POSITION, SUPPORT_KEY, SYNC_DELAY, SYNC_INTERVAL} from "./const";
 import query from "./libs/query";
 
 import Dialog from 'primevue/dialog';
-import VImage from 'primevue/image';
 
 import DialogHeader from "./components/header";
 import DialogFooter from "./components/footer";
 import LeftBorder from "./components/leftBorder";
+import RightBorder from "./components/rightBorder";
+import ChatMessages from "./components/chatMessages";
 
 export default {
   name: 'support-app',
   components: {
+    ChatMessages,
     DialogHeader,
-    LeftBorder,
+    LeftBorder, RightBorder,
     DialogFooter,
-    Dialog, VImage
+    Dialog,
   },
   data: () => ({
-    dialogStyle: { width: '340px' },
-
-    userKey: undefined,
+    dialogStyle: {width: '340px'},
     visible: false,
     position: POSITION[2],
+
+    userKey: undefined,
+    lastDate: undefined,
 
     syncInterval: undefined,
     content: [],
@@ -77,7 +73,7 @@ export default {
     open() {
       this.visible = true;
 
-      this.loadMessages();
+      !this.lastDate && this.loadMessages();
     },
 
     scrollChat() {
@@ -94,23 +90,23 @@ export default {
           type  : item.type,
           content: item.content,
         });
-      })
+      });
+
+      data.length && (this.lastDate = data.pop().date);
       this.scrollChat();
     },
 
     loadMessages(date) {
       query.Post({data: {action: 'loadMessages', date}}).then(d => {
         if (d['status']) {
-          this.userKey = d['userKey'];
+          window.localStorage.setItem(SUPPORT_KEY, this.userKey = d[SUPPORT_KEY]);
           this.addContent(d['data']);
-
-          d['support-user-key'] && localStorage.setItem('support-user-key', d['support-user-key']);
         }
       })
     },
 
     startSync() {
-      this.syncInterval = setInterval(() => this.loadMessages(new Date().getTime() / 1e3 | 0), SYNC_INTERVAL);
+      this.syncInterval = setInterval(() => this.loadMessages(this.lastDate), SYNC_INTERVAL);
 
       setTimeout(() => this.stopSync(), SYNC_DELAY);
     },

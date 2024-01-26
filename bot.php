@@ -23,12 +23,12 @@ try {
 
       $result = $main->db->addMessageFromTG($bot);
 
-      // расскидать всем подписчикам в боте $bot->sendToBot();
+      // расскидать всем подписчикам в боте
+      $result = $bot->sendToBot();
       break;
 
     case 'loadMessages':
       //$result['data']    = $main->db->loadMessages();
-      //$result['userKey'] = $main->getParam('userKey');
       break;
 
     default: die('default action');

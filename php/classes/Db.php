@@ -41,14 +41,8 @@ class Db extends R {
     });
   }
 
-  private function convertDateFormatField(array $arr): array {
-    foreach ($arr as &$value) {
-      foreach (self::DB_DATE_FIELDS as $dateF) {
-        if (isset($value[$dateF])) $value[$dateF] = date_format(date_create($value[$dateF]), self::SHOW_DATE_FORMAT);
-      }
-    }
-
-    return $arr;
+  private function convertDateFormatField(string $value): string {
+    return date_format(date_create($value), self::DB_DATE_FORMAT);
   }
 
 
@@ -139,28 +133,26 @@ class Db extends R {
 
   //------------------------------------------------------------------------------------------------------------------
 
-  public function addMessage(string $supportKey): array {
+  public function addMessage(): string {
     $this->checkConnection();
 
     $request = $this->main->request;
-    $cookies = $request->cookies;
 
     $type = $request->request->get('type') ?? 'text';
     $content = $request->request->get('content');
-    $bean = R::dispense('messages');
+    $bean = self::dispense('messages');
 
     if ($type === 'file') {
       $fs = new FS($this->main);
       $content = $fs->prepareFile($request->files->get('content'))->getUri();
     }
 
-    $bean->chatKey = $supportKey ?? $cookies->get(COOKIE_SUPPORT_KEY);
-    $bean->userKey = $supportKey ?? $cookies->get(COOKIE_SUPPORT_KEY);
+    $bean->chatKey = $bean->userKey = $this->main->getParam(STORAGE_SUPPORT_KEY);
     $bean->type    = $type;
     $bean->content = $content;
 
     $this->main->setParam('content', $content);
-    return ['id' => R::store($bean)];
+    return self::store($bean);
   }
 
   public function addMessageFromTG(Bot $bot): array {
@@ -200,16 +192,16 @@ class Db extends R {
   }
 
   // Добавить аргумент загрузки по времени
-  public function loadMessages($supportKey): array {
+  public function loadMessages(): array {
     $this->checkConnection();
 
-    $cookies = $this->main->request->cookies;
-    //$date = $this->main->request->request->get('date');
+    $key = $this->main->getParam(STORAGE_SUPPORT_KEY);
 
     $sql = "SELECT id, user_key AS userKey, date, type, content FROM messages";
-    $sql .= " WHERE chat_key = '" . ($supportKey ?? $cookies->get(COOKIE_SUPPORT_KEY)) . "'";
+    $sql .= " WHERE chat_key = '" . $key . "'";
 
-    //if ($date) $sql .= " AND date > '" . date(self::DB_DATE_FORMAT, $date) . "'";
+    $date = $this->main->request->request->get('date');
+    if ($date) $sql .= " AND date > '" . $this->convertDateFormatField($date) . "'";
 
     return R::getAll($sql);
   }

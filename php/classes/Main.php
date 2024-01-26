@@ -1,7 +1,6 @@
 <?php
 
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Cookie;
 use Symfony\Component\HttpFoundation\Response;
 
 final class Main {
@@ -40,34 +39,19 @@ final class Main {
   public function __construct(array $param) {
     $this->setSettings(VC::DB_CONFIG, DB_CONFIG);
 
-    $this->request = Request::createFromGlobals();
-    $this->response  = new Response();
-
     $this->db = new Db($this);
+    $this->request = Request::createFromGlobals();
+    $this->response = new Response();
 
     $this->setParam($this->request->request->all());
     $this->updateUniqueKey();
   }
 
   private function updateUniqueKey() {
-    $userKey = $this->request->request->get(COOKIE_SUPPORT_KEY);
-    $userKey = $userKey ?? $this->request->cookies->get('support-user-key');
+    $userKey = $this->request->request->get(STORAGE_SUPPORT_KEY);
     $userKey = $userKey ?? uniqid('', true);
 
-    //def('null');
-
-    $this->setParam('userKey', $userKey);
-
-    // https:// http:// заменить или нет?
-
-    $this->setParam(COOKIE_SUPPORT_KEY, $userKey);
-
-    $this->response->headers->setCookie(
-      new Cookie(
-        COOKIE_SUPPORT_KEY, $userKey, time() + 2592000,
-        '/', $this->request->server->get('HTTP_ORIGIN'), null, false
-      )
-    );
+    $this->setParam(STORAGE_SUPPORT_KEY, $userKey);
   }
 
   /* -------------------------------------------------------------------------------------------------------------------

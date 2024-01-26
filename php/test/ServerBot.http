@@ -24,7 +24,7 @@ Content-Type: application/json
 POST http://supportchat/bot.php
 Content-Type: application/json
 
-{"update_id":222027554, "message":{"message_id":185,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706093662,"text":"@vistegra_support_bot >4487345<:","entities":[{"offset":0,"length":21,"type":"mention"}]}}
+{"update_id":222027554, "message":{"message_id":185,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706093662,"text":"@vistegra_support_bot >9377563<:","entities":[{"offset":0,"length":21,"type":"mention"}]}}
 
 ### Кнопка X - удалить кнопки
 POST http://supportchat/bot.php
@@ -36,7 +36,7 @@ Content-Type: application/json
 POST http://supportchat/bot.php
 Content-Type: application/json
 
-{"update_id":222027522,"message":{"message_id":109,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706008792,"text":"@vistegra_support_bot >4487345<:\n\ntest with target","entities":[{"offset":0,"length":21,"type":"mention"}]}}
+{"update_id":222027522,"message":{"message_id":109,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706008792,"text":"@vistegra_support_bot >9377563<:\n\ntest with target","entities":[{"offset":0,"length":21,"type":"mention"}]}}
 
 ### Отправка картинки с подписью
 POST http://supportchat/bot.php

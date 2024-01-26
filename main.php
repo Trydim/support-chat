@@ -5,19 +5,17 @@ require __DIR__ . '/php/app.php';
 
 $main = new Main(['DEBUG' => true]);
 
-$result = [];
 $action = $main->getParam('action');
-
-$supportKey = $main->request->request->get(COOKIE_SUPPORT_KEY);
+$result[STORAGE_SUPPORT_KEY] = $main->getParam(STORAGE_SUPPORT_KEY);
 
 switch ($action) {
   case 'addMessage':
     $request = $main->request;
-    $result  = $main->db->addMessage($supportKey);
+    $result['msgId'] = $main->db->addMessage();
 
     $data = [
       'host'    => $request->server->get('HTTP_HOST'),
-      'chatKey' => $supportKey ?? $request->cookies->get(COOKIE_SUPPORT_KEY),
+      'chatKey' => $request->request->get(STORAGE_SUPPORT_KEY),
       'type'    => $request->request->get('type'),
       'text'    => $main->getParam('content'),
     ];
@@ -25,12 +23,10 @@ switch ($action) {
     $result['error'] = (new Bot(['message' => $data], false))->sendToBot()->getError();
     break;
   case 'loadMessages':
-    $result['data']    = $main->db->loadMessages($supportKey);
-    $result['userKey'] = $main->getParam('userKey');
+    $result['data'] = $main->db->loadMessages();
     break;
 
   default: die('default action');
 }
 
-$result[COOKIE_SUPPORT_KEY] = $main->getParam(COOKIE_SUPPORT_KEY);
 $main->send($result);

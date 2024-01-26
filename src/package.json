@@ -1,7 +1,7 @@
 {
   "version": "1.0.0",
   "description": "Graddoor",
-  "name": "graddoor-webpack",
+  "name": "support-webpack",
   "private": true,
   "scripts": {
     "updateVersion": "node ./webpack/updateVersion.js",
