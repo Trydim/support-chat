@@ -18,9 +18,9 @@
       </i>
     </div>
 
-    <textarea v-else class="chat-input" rows="1"
+    <textarea v-else ref="textarea" class="chat-input" rows="1"
               :disabled="disabled" v-model="message"
-              @focus="onEnterEvent" @change="changeTextarea" @blur="removeEnterEvent"
+              @focus="onEnterEvent" @input="changeTextarea" @blur="removeEnterEvent"
     ></textarea>
 
     <button type="button" class="message-send" @click="send">
@@ -91,9 +91,11 @@ export default {
     onEnterEvent() { document.addEventListener('keydown', this.onKeyDown) },
     removeEnterEvent() { document.removeEventListener('keydown', this.onKeyDown) },
 
-    changeTextarea(e) {
-      e.target.style.height = '40px';
-      e.target.style.height = e.target.scrollHeight + 'px';
+    changeTextarea() {
+      const t = this.$refs.textarea;
+
+      t.style.height = '40px';
+      t.style.height = t.scrollHeight + 'px';
     },
 
     uploadFile(e) {
@@ -118,6 +120,10 @@ export default {
         this.disabled = false;
         this.message = '';
         this.removeFile();
+        this.$nextTick(() => {
+          this.changeTextarea();
+          this.$refs.textarea.focus();
+        });
       });
     },
   },

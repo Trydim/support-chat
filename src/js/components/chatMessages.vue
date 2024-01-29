@@ -1,8 +1,8 @@
 <template>
-  <div class="chat-messages">
+  <div ref="msgContent" class="chat-messages" @scroll="autoScroll = false">
     <div v-for="(item, index) of content" :key="index"
          class="message-box-holder" :class="{'message-right': item.author}">
-      <div v-if="item.type === 'text'" class="message-box">{{ item.content }}</div>
+      <div v-if="item.type === 'text'" class="message-box" v-html="getMsgContent(item.content)"></div>
 
       <VImage v-else class="message-img" :src="item.content" alt="Image" preview></VImage>
       <div class="message-info">{{ item.author ? '' : 'Специалист,' }} {{ getChatDate(item.date) }}</div>
@@ -22,10 +22,29 @@ export default {
   components: {VImage},
   data() {
     return {
+      autoScroll: true,
       today: new Date().toLocaleString().slice(0, 10),
     };
   },
+  watch: {
+    content: {
+      deep: true,
+      handler() { this.autoScroll && this.scrollChat() },
+    },
+  },
   methods: {
+    scrollChat() {
+
+      // отключать автопрокрутку при обновлении если пользователь прокрутил вверх
+      // включать автопрокрутку при отправлении сообщений
+      setTimeout(() => {
+        const n = this.$refs.msgContent.lastElementChild;
+        n && n.scrollIntoView();
+      }, 300);
+    },
+
+    getMsgContent(content) { return content.replaceAll('\n', '<br>') },
+
     getChatDate(date) {
       let r;
 

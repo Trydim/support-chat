@@ -36,6 +36,7 @@ ul {
   border-left: 1px solid #e2f5ff;
   border-right: 1px solid #e2f5ff;
   background: white;
+  max-height: 60vh;
 }
 
 .chat-content {
@@ -143,6 +144,7 @@ ul {
     margin: 0 1rem;
     padding: 12px;
     min-height: 40px;
+    max-height: 146px; // 8 row
     border: none;
     background: transparent;
     resize: none;
