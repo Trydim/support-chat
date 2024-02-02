@@ -5,7 +5,8 @@ class Bot {
   const URL_FILE_TELEGRAM = 'https://api.telegram.org/file/bot';
   const TOKEN_TELEGRAM = '6985649319:AAEm0yWTVN1EJd4_QN2AQLFZFAW9pj5lKBU';
 
-  const SUBSCRIBE_PATH = __DIR__ . '/../../storage/subscribeList.json';
+  const BOT_PATH       = __DIR__ . '/../../storage/botList.json';
+  const SUBSCRIBE_PATH = __DIR__ . '/../../storage/subscribeList';
   const UPLOAD_PATH    = __DIR__ . '/../../storage/upload/';
 
   const SEND_ERROR_TG = [
@@ -13,6 +14,12 @@ class Bot {
     '2' => '❌: Адресат недоступен',
     '3' => '❌: Серверу не удалось загрузить файл',
   ];
+
+  /**
+   * @var string
+   */
+  private $useBotToken = '';
+  private $subscribePostfix = '';
 
   /**
    * @var object
@@ -69,7 +76,15 @@ class Bot {
 
   private $errors = [];
 
-  public function __construct(array $data, bool $check = true) {
+  public function __construct(array $data, bool $check, $botKey) {
+    $this->setParam($data);
+
+    $check && $this->checkRequirements();
+
+    $this->setBotToken($botKey);
+  }
+
+  private function setParam(array $data) {
     $this->original = new class {
       var $message = [];
       var $file = [];
@@ -92,10 +107,7 @@ class Bot {
     $this->msgId  = $message['message_id'] ?? '';
     $this->chatId = $message['chat']['id'] ?? '';
     $this->type   = $message['type'] ?? null;
-
-    $check && $this->checkRequirements();
   }
-
   private function checkKeyCallBack(array $data): array {
     if (!array_key_exists('callback_query', $data)) return $data;
 
@@ -125,6 +137,21 @@ class Bot {
       return;
     }
   }
+  private function setBotToken($botKey) {
+    $botList = [];
+
+    if ($botKey !== null && file_exists(self::BOT_PATH)) {
+      $botList = json_decode(file_get_contents(self::BOT_PATH), true);
+    }
+
+    if ($botKey !== null && isset($botList[$botKey])) {
+      $this->useBotToken = $botList[$botKey];
+      $this->subscribePostfix = '-' . substr($botList[$botKey], -7, 7) . '.json';
+    } else {
+      $this->useBotToken = self::TOKEN_TELEGRAM;
+      $this->subscribePostfix = '.json';
+    }
+  }
 
   private function addChatId($id): Bot {
     if (is_array($id)) $this->sendChatId = array_merge($this->sendChatId, $id);
@@ -137,7 +164,7 @@ class Bot {
     $index = count($this->original->file) - 1;
     $file  = $this->original->file[$index];
 
-    $result = httpRequest(self::URL_TELEGRAM . self::TOKEN_TELEGRAM . '/getFile?file_id=' . $file['file_id']);
+    $result = httpRequest(self::URL_TELEGRAM . $this->useBotToken . '/getFile?file_id=' . $file['file_id']);
     if (!$result['ok']) def('getContentFilePath error', false);
 
     return $result['result']['file_path'] ?? '';
@@ -146,7 +173,7 @@ class Bot {
     $file = $this->getContentFilePath();
     $localFile = uniqid() . '.' . pathinfo($file, PATHINFO_EXTENSION);
 
-    $from = self::URL_FILE_TELEGRAM . self::TOKEN_TELEGRAM . '/' . $file;
+    $from = self::URL_FILE_TELEGRAM . $this->useBotToken . '/' . $file;
     $to   = self::UPLOAD_PATH . $localFile;
 
     $result = copy($from, $to);
@@ -193,7 +220,7 @@ class Bot {
   }
   private function send() {
     $result = [];
-    $url = self::URL_TELEGRAM . self::TOKEN_TELEGRAM . '/' . $this->method;
+    $url = self::URL_TELEGRAM . $this->useBotToken . '/' . $this->method;
     $send = $this->sendData;
 
     foreach ($this->sendChatId as $id) {
@@ -277,12 +304,12 @@ class Bot {
   public function getError(): array { return $this->errors; }
 
   private function loadSubscribe() {
-    $subscribes = file_get_contents(self::SUBSCRIBE_PATH);
+    $subscribes = file_get_contents(self::SUBSCRIBE_PATH . $this->subscribePostfix);
 
     $this->subscribes = json_decode(is_string($subscribes) ? $subscribes : '{}', true);
   }
   private function saveSubscribe() {
-    file_put_contents(self::SUBSCRIBE_PATH, json_encode($this->subscribes));
+    file_put_contents(self::SUBSCRIBE_PATH . $this->subscribePostfix, json_encode($this->subscribes));
   }
   private function checkUser(): bool {
     if ($this->subscribes === null) $this->loadSubscribe();

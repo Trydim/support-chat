@@ -11,7 +11,7 @@ import App from './App.vue';
 import btnStyle from "../css/btn.scss";
 
 class Application {
-  constructor() {
+  constructor(settings) {
     const style = document.createElement('style');
 
     style.innerHTML = styleApp['toString']();
@@ -21,9 +21,10 @@ class Application {
 
     const app = createApp(App);
     app.use(PrimeVue);
+    app.config.globalProperties.$globalSettings = settings || {};
 
     app.mount('#supportApp');
   }
 }
 
-new Application();
+new Application(window['supportBotSettings']);

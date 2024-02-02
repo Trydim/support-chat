@@ -33,7 +33,7 @@ class FS {
 
   private function setFileParam($file) {
     $this->param->ext  = $file->getClientOriginalExtension();
-    $this->param->name = pathinfo($file->getFilename(), PATHINFO_FILENAME) . '.' . $this->param->ext;
+    $this->param->name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.' . $this->param->ext;
     $this->param->type = $file->getType();
     $this->param->size = $file->getSize();
     $this->param->uri  = $this->fileUrl . $this->param->name;

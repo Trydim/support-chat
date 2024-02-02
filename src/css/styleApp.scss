@@ -36,6 +36,7 @@ ul {
   border-left: 1px solid #e2f5ff;
   border-right: 1px solid #e2f5ff;
   background: white;
+  max-height: 60vh;
 }
 
 .chat-content {
@@ -91,6 +92,10 @@ ul {
   color: #3D3D3D;
   max-width: 95%;
   overflow-wrap: break-word;
+
+  &.file {
+
+  }
 }
 
 .message-img img {
@@ -143,6 +148,7 @@ ul {
     margin: 0 1rem;
     padding: 12px;
     min-height: 40px;
+    max-height: 146px; // 8 row
     border: none;
     background: transparent;
     resize: none;
@@ -150,34 +156,42 @@ ul {
     &:focus {
       outline: none;
     }
-  }
 
-  .chat-input-img-wrap {
-    position: relative;
-    margin-left: 1rem;
-    margin-right: auto;
-    border-radius: 4px;
-    padding: 5px;
-    background: #d9d9d9;
-  }
+    &-file-wrap {
+      position: relative;
+      margin-left: 1rem;
+      margin-right: auto;
+      border-radius: 4px;
+      padding: 5px;
+      background: #d9d9d9;
 
-  .chat-input-img {
-    height: 80px;
-    width: 110px;
-    object-fit: fill;
-    vertical-align: bottom;
-  }
+      &.document {
+        width: 100%;
+      }
+    }
 
-  .chat-input-img-remove {
-    position: absolute;
-    top: 8px;
-    right: 8px;
-    z-index: +1;
-    cursor: pointer;
+    &-img {
+      height: 80px;
+      width: 110px;
+      object-fit: fill;
+      vertical-align: bottom;
+    }
 
-    svg {
-      border-radius: 50%;
-      background: rgba(217, 217, 217, 0.5);
+    &-file {
+      line-height: 40px;
+    }
+
+    &-file-remove {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: +1;
+      cursor: pointer;
+
+      svg {
+        border-radius: 50%;
+        background: rgba(217, 217, 217, 0.5);
+      }
     }
   }
 

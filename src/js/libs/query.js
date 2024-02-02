@@ -2,7 +2,10 @@
 
 import {MAIN_URL} from "../const";
 
+const BOT_SETTINGS = window['supportBotSettings'] || {};
+
 const MAIN_PHP_PATH = MAIN_URL + 'main.php';
+const SECRET_TOKEN = BOT_SETTINGS.bot || undefined;
 
 const checkJSON = (data) => {
   try {
@@ -51,6 +54,7 @@ const downloadBody = async (data) => {
 const query = (url, body, type = 'json') => {
   const headers = {
     'Cookie': document.cookie,
+    'X-Telegram-Bot-Api-Secret-Token': SECRET_TOKEN,
   };
 
   if (body && ['object', 'string'].includes(typeof body) && !(body instanceof FormData)) {
@@ -65,7 +69,8 @@ const query = (url, body, type = 'json') => {
     }
     else data.set('content', body);
 
-    const v = localStorage.getItem('support-user-key');
+    // не очень место
+    let v = localStorage.getItem('support-user-key');
     if (v && v !== 'null') data.set('support-user-key', v);
 
     body = data;

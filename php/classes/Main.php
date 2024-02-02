@@ -4,6 +4,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
 final class Main {
+  const TG_SECRET_TOKEN_KEY = 'X-Telegram-Bot-Api-Secret-Token';
   /**
    * @var array
    */
@@ -44,6 +45,7 @@ final class Main {
     $this->response = new Response();
 
     $this->setParam($this->request->request->all());
+    $this->setParam('token', $this->request->headers->get(self::TG_SECRET_TOKEN_KEY));
     $this->updateUniqueKey();
   }
 

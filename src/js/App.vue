@@ -18,7 +18,7 @@
       <div class="chat-content">
         <left-border :node="$refs.dialog" @drag="dragSize"></left-border>
         <right-border :node="$refs.dialog" @drag="dragSize"></right-border>
-        <chat-messages ref="msgContent" :content="content"></chat-messages>
+        <chat-messages :sended="true" :content="content"></chat-messages>
       </div>
 
       <template #footer>
@@ -78,12 +78,6 @@ export default {
       !this.lastDate && this.loadMessages();
     },
 
-    scrollChat() {
-      setTimeout(() => {
-        const n = this.$refs['msgContent'].$el.lastElementChild;
-        n && n.scrollIntoView();
-      }, 300);
-    },
     addContent(data) {
       data.forEach(item => {
         this.content.push({
@@ -95,7 +89,6 @@ export default {
       });
 
       data.length && (this.lastDate = data.pop().date);
-      this.scrollChat();
     },
 
     loadMessages(date) {

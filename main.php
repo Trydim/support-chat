@@ -20,7 +20,8 @@ switch ($action) {
       'text'    => $main->getParam('content'),
     ];
 
-    $result['error'] = (new Bot(['message' => $data], false))->sendToBot()->getError();
+    $bot = new Bot(['message' => $data], false,  $main->getParam('token'));
+    $result['error'] = $bot->sendToBot()->getError();
     break;
   case 'loadMessages':
     $result['data'] = $main->db->loadMessages();

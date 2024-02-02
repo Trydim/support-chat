@@ -9,7 +9,9 @@ try {
   $data = json_decode($data, true);
 
   $result = [];
-  $bot    = new Bot($data);
+
+  $main = new Main(['DEBUG' => true]);
+  $bot  = new Bot($data, true, $main->getParam('token'));
   $action = $bot->getAction();
 
   switch ($action) {
@@ -19,8 +21,6 @@ try {
     case 'callback': $bot->execCallback(); break;
 
     case 'message':
-      $main = new Main(['DEBUG' => true]);
-
       $result = $main->db->addMessageFromTG($bot);
 
       // расскидать всем подписчикам в боте
