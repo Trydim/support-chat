@@ -34,7 +34,7 @@ class Bot {
   /**
    * @var string
    */
-  private $host;
+  private $from;
   /**
    * @var string
    */
@@ -78,10 +78,9 @@ class Bot {
 
   public function __construct(array $data, bool $check, $botKey) {
     $this->setParam($data);
+    $this->setBotToken($botKey);
 
     $check && $this->checkRequirements();
-
-    $this->setBotToken($botKey);
   }
 
   private function setParam(array $data) {
@@ -103,7 +102,7 @@ class Bot {
 
     $this->original->message = $message;
 
-    $this->host   = $message['host'] ?? null;
+    $this->from   = $message['fromSite'] ?? null; // Не очень
     $this->msgId  = $message['message_id'] ?? '';
     $this->chatId = $message['chat']['id'] ?? '';
     $this->type   = $message['type'] ?? null;
@@ -183,13 +182,13 @@ class Bot {
   }
 
   private function setContent(): Bot {
-    $host = $this->host;
+    $from = $this->from;
     $key  = substr($this->getChatKey(), -7, 7); // Последние 7 символов
     $type = $this->getType();
     $content = htmlspecialchars($this->getContent());
 
     if ($type === 'text') {
-      $this->sendData['text'] = $host ? "Сайт <b>$host</b>:\n$content"
+      $this->sendData['text'] = $from ? "<b>$from</b>:\n$content"
                                       : $this->getUser() . ":\n$content";
     } else {
       // Определить тип файла
@@ -201,6 +200,7 @@ class Bot {
       $this->sendData[$typeKey] = $content;
     }
 
+    if ($from) {
     $this->sendData['reply_markup'] = [
       "inline_keyboard" => [
         [
@@ -210,11 +210,13 @@ class Bot {
           ],
           [
             "text" => "Ответить",
+            "switch_inline_query" => "reply",
             "switch_inline_query_current_chat" => ">$key<:\n\n"
           ],
         ]
       ]
     ];
+    }
 
     return $this;
   }
@@ -224,7 +226,7 @@ class Bot {
     $send = $this->sendData;
 
     foreach ($this->sendChatId as $id) {
-      if ($this->action !== 'error' && $this->chatId === $id) continue; // Самому себе не отправлять
+      if (!in_array($this->action, ['error', 'start', 'stop']) && $this->chatId === $id) continue; // Самому себе не отправлять
       $send['chat_id'] = $id;
       $result[$id] = httpRequest($url, ['method' => 'post'], json_encode($send));
     }

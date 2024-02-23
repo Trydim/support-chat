@@ -30,6 +30,17 @@ ul {
   right: 1rem;
 }
 
+.p-dialog-header-close {
+  transition: all 0.5s linear;
+  &:hover {
+    transform: scale(1.2);
+
+    path { fill: #002566; }
+  }
+
+  &:focus { outline: none; }
+}
+
 // Content
 
 .p-dialog-content {

@@ -3,6 +3,11 @@
 require __DIR__ . '/php/libs/vendor/autoload.php';
 require __DIR__ . '/php/app.php';
 
+//$data = json_encode($_REQUEST);
+//file_put_contents(__DIR__ . '/logs/botLog.json', $data);
+
+//def($_SERVER);
+
 $main = new Main(['DEBUG' => true]);
 
 $action = $main->getParam('action');
@@ -14,7 +19,7 @@ switch ($action) {
     $result['msgId'] = $main->db->addMessage();
 
     $data = [
-      'host'    => $request->server->get('HTTP_ORIGIN'),
+      'fromSite' => $request->request->get('from'),
       'chatKey' => $main->getParam(STORAGE_SUPPORT_KEY),
       'type'    => $request->request->get('type'),
       'text'    => $main->getParam('content'),
