@@ -58,6 +58,7 @@ export default {
     position: POSITION[2],
 
     userKey: undefined,
+    from   : undefined, // От кого сообщение
     lastDate: undefined,
 
     syncInterval: undefined,
@@ -124,6 +125,7 @@ export default {
       query.Post({
         data: {
           action: 'addMessage',
+          from: this.from,
           type, content: this.sendData,
         }
       }).then(d => {
@@ -135,6 +137,11 @@ export default {
         }]);
       }).finally(finish);
     }
+  },
+  created() {
+    let from = this.$globalSettings.from;
+    if (from) from = typeof from === 'string' ? from : from(this);
+    this.from = from || location.host + location.pathname;
   },
   mounted() {
     this.open();
