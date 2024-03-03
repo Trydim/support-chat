@@ -239,7 +239,12 @@ class Bot {
   public function getChatKey(): string {
     if ($this->chatKey === null) {
       $match = [];
-      $res = preg_match('/[>](.+)[<]/', $this->original->message['text'], $match); // '....>12345<...' -> '12345'
+
+      $text = array_key_exists('reply_to_message', $this->original->message)
+        ? $this->original->message['reply_to_message']['reply_markup']['inline_keyboard'][0][1]['switch_inline_query_current_chat']
+        : $this->original->message['text'];
+
+      $res = preg_match('/[>](.+)[<]/', $text, $match); // '....>12345<...' -> '12345'
       $res = $res === 1 ? $match[1] : $this->original->message['chatKey'] ?? '-1';
 
       $this->chatKey = $res;

@@ -39,6 +39,12 @@ Content-Type: application/json
 
 {"update_id":222027522,"message":{"message_id":109,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706008792,"text":"@vistegra_support_bot >9377563<:\n\ntest with target","entities":[{"offset":0,"length":21,"type":"mention"}]}}
 
+### Ответить через контекстное меню
+POST http://support-chat/bot.php
+Content-Type: application/json
+
+{"update_id":222027770, "message":{"message_id":1412,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1709430087,"reply_to_message":{"message_id":1407,"from":{"id":6985649319,"is_bot":true,"first_name":"vistegra_support_bot","username":"vistegra_support_bot"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1709429515,"text":"\u0421\u0430\u0439\u0442 http://support-chat:\ntest local","entities":[{"offset":5,"length":19,"type":"bold"}],"reply_markup":{"inline_keyboard":[[{"text":"\u0425","callback_data":"hideBtn"},{"text":"\u041e\u0442\u0432\u0435\u0442\u0438\u0442\u044c","switch_inline_query_current_chat":">2708376<:\n\n"}]]}},"text":"to local3"}}
+
 ### Отправка картинки с подписью
 POST http://supportchat/bot.php
 Content-Type: application/json
