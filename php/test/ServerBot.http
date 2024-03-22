@@ -50,3 +50,11 @@ POST http://supportchat/bot.php
 Content-Type: application/json
 
 {"update_id":222027549,"message":{"message_id":175,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1706050582,"photo":[{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAANzAAM0BA","file_unique_id":"AQADcdwxG68cgEl4","file_size":920,"width":90,"height":74},{"file_id":"AgACAgIAAxkBAAOvZbBEFoUXjLxZ6HysPvQ3E7jR4D8AAnHcMRuvHIBJJqF--ShDKukBAAMCAANtAAM0BA","file_unique_id":"AQADcdwxG68cgEly","file_size":10108,"width":320,"height":262},{"file_id":"AgACAgIAAxkBAAOzZbDimasTESF-0UlxdnEbFfI1npMAAnXQMRvCB4hJoZpQGfYd7UYBAAMCAAN4AAM0BA","file_unique_id":"AQADcdwxG68cgEl9","file_size":12568,"width":408,"height":334}],"caption":"@vistegra_support_bot >4487345<:\n\ntest test","caption_entities":[{"offset":0,"length":21,"type":"mention"}]}}
+
+
+###
+POST http://supportchat/bot.php
+Content-Type: application/json
+
+{"update_id":222027821,"message":{"message_id":1735,"from":{"id":914134752,"is_bot":false,"first_name":"Dmitry","last_name":"Try","username":"trydim85","language_code":"ru"},"chat":{"id":914134752,"first_name":"Dmitry","last_name":"Try","username":"trydim85","type":"private"},"date":1711107916,"text":"@vistegra_support_bot >119-2226411<:\n\nto grad","entities":[{"offset":0,"length":21,"type":"mention"}]}}
+

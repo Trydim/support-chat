@@ -21,10 +21,15 @@ try {
     case 'callback': $bot->execCallback(); break;
 
     case 'message':
-      $result = $main->db->addMessageFromTG($bot);
+      $msgId = $main->db->addMessageFromTG($bot);
+
+      //$msg = $bot->checkReply() ? $main->db->loadMessageById($bot->getDBMessageId()) : [];
+      $msg = $main->db->loadMessageById($bot->getDBMessageId());
 
       // расскидать всем подписчикам в боте
-      $result = $bot->sendToBot();
+      $bot->sendToBot('', $msg['message_id'] ?? []);
+
+      //if (count($bot->getComplete())) $main->db->setMessageId($msgId, $bot->prepareMessageId());
       break;
 
     case 'loadMessages':

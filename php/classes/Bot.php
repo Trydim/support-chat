@@ -74,6 +74,7 @@ class Bot {
     'parse_mode' => 'HTML',
   ];
 
+  private $complete = [];
   private $errors = [];
 
   public function __construct(array $data, bool $check, $botKey) {
@@ -181,7 +182,7 @@ class Bot {
     return $result ? $localFile : '';
   }
 
-  private function setContent(): Bot {
+  private function setContent(string $msgId): Bot {
     $from = $this->from;
     $key  = substr($this->getChatKey(), -7, 7); // Последние 7 символов
     $type = $this->getType();
@@ -201,52 +202,70 @@ class Bot {
     }
 
     if ($from) {
-    $this->sendData['reply_markup'] = [
-      "inline_keyboard" => [
-        [
+      $this->sendData['reply_markup'] = [
+        "inline_keyboard" => [
           [
-            "text" => "Х",
-            "callback_data" => "hideBtn"
-          ],
-          [
-            "text" => "Ответить",
-            "switch_inline_query" => "reply",
-            "switch_inline_query_current_chat" => ">$key<:\n\n"
-          ],
+            [
+              "text" => "Х",
+              "callback_data" => "hideBtn"
+            ],
+            [
+              "text" => "Ответить",
+              "switch_inline_query_current_chat" => ">$msgId-$key<:\n\n",
+            ],
+          ]
         ]
-      ]
-    ];
+      ];
     }
 
     return $this;
   }
-  private function send() {
+  private function send(array $reply = []) {
     $result = [];
+    $error  = [];
     $url = self::URL_TELEGRAM . $this->useBotToken . '/' . $this->method;
     $send = $this->sendData;
 
     foreach ($this->sendChatId as $id) {
       if (!in_array($this->action, ['error', 'start', 'stop']) && $this->chatId === $id) continue; // Самому себе не отправлять
       $send['chat_id'] = $id;
+      // Добавить ссылку на ответ
+      if (isset($reply[$id])) $send['reply_parameters']['message_id'] = $reply[$id];
+
       $result[$id] = httpRequest($url, ['method' => 'post'], json_encode($send));
+
+      if ($result[$id]['ok']) $this->complete[] = $result[$id]['result'];
+      else $error[] = $result[$id];
     }
 
-    $result = array_filter($result, function ($item) { return $item['ok'] !== true; });
-    if (count($result) !== 0) {
-      def($result, false);
-      $this->errors[] = 'send error';
+    if (count($error)) {
+      def($error, false);
+      $this->errors[] = 'Send error';
     }
   }
 
+  public function checkReply(): bool { return array_key_exists('reply_to_message', $this->original->message); }
+  public function getDBMessageId(): string {
+    $match = [];
+
+    $text = $this->checkReply()
+      ? $this->original->message['reply_to_message']['reply_markup']['inline_keyboard'][0][1]['switch_inline_query_current_chat']
+      : $this->original->message['text'];
+
+    $res = preg_match('/[>](\d+)[-]/', $text, $match); // '....>12345-...' -> '12345'
+    $res = $res === 1 ? $match[1] : '';
+
+    return $res;
+  }
   public function getChatKey(): string {
     if ($this->chatKey === null) {
       $match = [];
 
-      $text = array_key_exists('reply_to_message', $this->original->message)
+      $text = $this->checkReply()
         ? $this->original->message['reply_to_message']['reply_markup']['inline_keyboard'][0][1]['switch_inline_query_current_chat']
         : $this->original->message['text'];
 
-      $res = preg_match('/[>](.+)[<]/', $text, $match); // '....>12345<...' -> '12345'
+      $res = preg_match('/[-](.+)[<]/', $text, $match); // '....-12345<...' -> '12345'
       $res = $res === 1 ? $match[1] : $this->original->message['chatKey'] ?? '-1';
 
       $this->chatKey = $res;
@@ -274,7 +293,7 @@ class Bot {
       $text = $this->original->message['text'];
 
       // '....>12345<:\n\nText..' -> 'Text..'
-      if ($chatKey !== '-1') $text = preg_replace("/^.+>$chatKey<:/", '', $text);
+      if ($chatKey !== '-1') $text = preg_replace("/^.+-$chatKey<:/", '', $text);
 
       $this->content = trim($text);
     }
@@ -308,7 +327,16 @@ class Bot {
 
     return $this->action;
   }
+  public function getComplete(): array { return $this->complete; }
   public function getError(): array { return $this->errors; }
+  public function prepareMessageId(): string {
+    if (count($this->complete) === 0) return '';
+
+    return json_encode(array_reduce($this->complete, function ($r, $item) {
+      $r[$item['chat']['id']] = $item['message_id'];
+      return $r;
+    }, []));
+  }
 
   private function loadSubscribe() {
     $subscribes = file_get_contents(self::SUBSCRIBE_PATH . $this->subscribePostfix);
@@ -365,12 +393,12 @@ class Bot {
         break;
     }
   }
-  public function sendToBot(): Bot {
+  public function sendToBot(string $msgId, array $reply = []): Bot {
     if ($this->subscribes === null) $this->loadSubscribe();
 
-    $this->setContent()
+    $this->setContent($msgId)
          ->addChatId(array_keys($this->subscribes))
-         ->send();
+         ->send($reply);
 
     return $this;
   }

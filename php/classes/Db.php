@@ -14,6 +14,10 @@ class Db extends R {
     'createDate', 'lastEditDate', 'registerDate'
   ];
 
+  const DB_JSON_FIELDS = ['message_id'];
+
+  const DB_BLOB_FIELDS = []; //
+
   /**
    * @var Main
    */
@@ -45,6 +49,27 @@ class Db extends R {
     return date_format(date_create($value), self::DB_DATE_FORMAT);
   }
 
+  /**
+   * @param array $arr
+   * @return array
+   */
+  private function jsonParseField(array $arr): array {
+    $result = [];
+
+    foreach ($arr as $key => $value) {
+      if (is_array($value)) {
+        $result[$key] = $this->jsonParseField($value);
+      } else if (in_array($key, self::DB_JSON_FIELDS)) {
+        $result[$key] = json_decode($value, true);
+      } else if (in_array($key, self::DB_BLOB_FIELDS)) {
+        $result[$key] = empty($value) ? [] : json_decode(gzuncompress($value), true);
+      } else {
+        $result[$key] = $value;
+      }
+    }
+
+    return $result;
+  }
 
   public function __construct(Main $main) {
     $this->main = $main;
@@ -125,7 +150,7 @@ class Db extends R {
     }
 
     $columns[0] !== '*' && $columns = array_map(function ($item) { return $this->setQueryAs($item); }, $columns);
-    $sql = 'SELECT ' . implode(', ',  $columns) . ' FROM ' . $this->pf($dbTable);
+    $sql = 'SELECT ' . implode(', ',  $columns) . ' FROM ' . $dbTable;
     if (strlen($filters)) $sql .= ' WHERE ' . $filters;
 
     return $simple ? self::getCol($sql) : self::getAll($sql);
@@ -155,7 +180,7 @@ class Db extends R {
     return self::store($bean);
   }
 
-  public function addMessageFromTG(Bot $bot): array {
+  public function addMessageFromTG(Bot $bot): string {
     $this->checkConnection();
 
     $bean = self::dispense('messages');
@@ -165,7 +190,7 @@ class Db extends R {
     $chatKey = self::findOne('messages', ' chat_key LIKE ? ', ["%$chatKey%"])->chatKey;
     if (empty($chatKey)) {
       $bot->sendErrorMessage(2);
-      return ['id' => false];
+      return '0';
     }
 
     if ($bot->getType() === 'file') {
@@ -188,7 +213,16 @@ class Db extends R {
     $bean->type    = 'text';
     $bean->content = $bot->getContent();
 
-    return ['id' => R::store($bean)];
+    return R::store($bean);
+  }
+
+  public function setMessageId(string $id, string $messageId) {
+    $bean = self::dispense('messages');
+
+    $bean->id = $id;
+    $bean->message_id = $messageId;
+
+    return self::store($bean);
   }
 
   // Добавить аргумент загрузки по времени
@@ -204,5 +238,13 @@ class Db extends R {
     if ($date) $sql .= " AND date > '" . $this->convertDateFormatField($date) . "'";
 
     return R::getAll($sql);
+  }
+
+  public function loadMessageById(string $id): array {
+    $row = $this->selectQuery('messages', '*', " id = '$id' ");
+
+    if (count($row) === 1) $row = $row[0];
+
+    return $this->jsonParseField($row);
   }
 }

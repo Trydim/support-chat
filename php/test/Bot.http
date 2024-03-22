@@ -10,5 +10,24 @@ Content-Disposition: form-data; name="text"
 
 query test
 --WebAppBoundary--
+Content-Disposition: form-data; name="reply_parameters"
+
+{"message_id": "1577"}
+--WebAppBoundary--
+
 
 ###
+POST https://api.telegram.org/bot6985649319:AAEm0yWTVN1EJd4_QN2AQLFZFAW9pj5lKBU/sendMessage
+Content-Type: multipart/form-data; boundary=WebAppBoundary
+
+--WebAppBoundary
+Content-Disposition: form-data; name="chat_id"
+
+914134752
+--WebAppBoundary--
+Content-Disposition: form-data; name="text"
+
+query test
+--WebAppBoundary--
+
+###{"chat_id":1,"parse_mode":"HTML","text":"<b>supportchat\/<\/b>:\nlocal test","reply_markup":{"inline_keyboard":[[{"text":"\u0425","callback_data":"hideBtn"},{"text":"\u041e\u0442\u0432\u0435\u0442\u0438\u0442\u044c","switch_inline_query_current_chat":">2721384<:\n\n"}]]}}
