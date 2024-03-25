@@ -42,6 +42,13 @@ import RightBorder from "./components/rightBorder";
 import ChatMessages from "./components/chatMessages";
 import VButton from "./components/button";
 
+const getISODate = () => {
+  const d = new Date(),
+        m = d.getMonth() + 1;
+
+  return `${d.getFullYear()}-${m < 10 ? '0' + m : m}-${d.getDate()} ${d.toTimeString().slice(0, 8)}`;
+}
+
 export default {
   name: 'support-app',
   components: {
@@ -131,7 +138,7 @@ export default {
       }).then(d => {
         if (d['status']) this.addContent([{
           userKey: this.userKey,
-          date: new Date().toISOString(),
+          date: getISODate(),
           type,
           content: type === 'file' ? URL.createObjectURL(this.sendData) : this.sendData,
         }]);

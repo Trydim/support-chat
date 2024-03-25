@@ -17,6 +17,13 @@
 
 import VImage from 'primevue/image';
 
+const getISODate = () => {
+  const d = new Date(),
+        m = d.getMonth() + 1;
+
+  return `${d.getFullYear()}-${m < 10 ? '0' + m : m}-${d.getDate()}`;
+}
+
 export default {
   name: 'chat-messages',
   props: {
@@ -26,7 +33,7 @@ export default {
   data() {
     return {
       autoScroll: true,
-      today: new Date().toLocaleString().slice(0, 10),
+      today: getISODate(),
     };
   },
   watch: {
@@ -50,14 +57,7 @@ export default {
     isImage(str) { return /(.png|.svg|.jpg)$/i.test(str) },
     getOriginalName(content) { return content.replace(/.+\/upload\//, '') },
 
-    getChatDate(date) {
-      let r;
-
-      date = new Date(Date.parse(date.replace(',', ''))).toLocaleString();
-      r = date.slice(0, 10);
-
-      return this.today === r ? date.slice(12) : date;
-    }
+    getChatDate(date) { return this.today === date.slice(0, 10) ? date.slice(11) : date }
   },
 }
 
