@@ -57,7 +57,9 @@ export default {
     isImage(str) { return /(.png|.svg|.jpg)$/i.test(str) },
     getOriginalName(content) { return content.replace(/.+\/upload\//, '') },
 
-    getChatDate(date) { return this.today === date.slice(0, 10) ? date.slice(11) : date }
+    getChatDate(date) {
+      return this.today === date.slice(0, 10) ? date.slice(11) : new Date(Date.parse(date)).toLocaleString();
+    },
   },
 }
 
