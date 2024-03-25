@@ -32,8 +32,13 @@ class FS {
   }
 
   private function setFileParam($file) {
-    $this->param->ext  = $file->getClientOriginalExtension();
-    $this->param->name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.' . $this->param->ext;
+    $ext = $file->getClientOriginalExtension();
+    $name = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+
+    if (file_exists($this->absUploadDir . $name . ".$ext")) $name .= uniqid();
+
+    $this->param->ext  = $ext;
+    $this->param->name = $name . ".$ext";
     $this->param->type = $file->getType();
     $this->param->size = $file->getSize();
     $this->param->uri  = $this->fileUrl . $this->param->name;

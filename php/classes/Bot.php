@@ -226,7 +226,7 @@ class Bot {
     $send = $this->sendData;
 
     foreach ($this->sendChatId as $id) {
-      if (!in_array($this->action, ['error', 'start', 'stop']) && $this->chatId === $id) continue; // Самому себе не отправлять
+      if (!in_array($this->getAction(), ['error', 'start', 'stop']) && $this->chatId === $id) continue; // Самому себе не отправлять
       $send['chat_id'] = $id;
       // Добавить ссылку на ответ
       if (isset($reply[$id])) $send['reply_parameters']['message_id'] = $reply[$id];
@@ -394,7 +394,7 @@ class Bot {
   public function sendToBot(string $msgId, array $reply = []): Bot {
     if ($this->subscribes === null) $this->loadSubscribe();
 
-    if ($this->action === 'error') $this->addChatId($this->chatId);
+    if ($this->getAction() === 'error') $this->addChatId($this->chatId);
     else $this->setContent($msgId)->addChatId(array_keys($this->subscribes));
 
     $this->send($reply);

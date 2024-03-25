@@ -54,7 +54,7 @@ export default {
     },
 
     getMsgContent(content) { return content.replaceAll('\n', '<br>') },
-    isImage(str) { return /(.png|.svg|.jpg)$/i.test(str) },
+    isImage(str) { return /(^blob|\.(png|svg|jpg)$)/i.test(str) },
     getOriginalName(content) { return content.replace(/.+\/upload\//, '') },
 
     getChatDate(date) {

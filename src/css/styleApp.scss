@@ -213,3 +213,18 @@ ul {
     cursor: pointer;
   }
 }
+
+.p-image-toolbar {
+  background: #e2f5ff;
+  border-radius: 4px;
+  padding: 4px;
+
+  svg {
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.p-image-preview {
+  border-radius: 4px;
+}
