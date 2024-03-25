@@ -36,6 +36,10 @@ try {
       //$result['data']    = $main->db->loadMessages();
       break;
 
+    case 'error':
+      $bot->sendToBot('');
+      break;
+
     default: die('default action');
   }
 } catch (Exception $exception) {

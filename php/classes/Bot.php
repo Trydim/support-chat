@@ -130,10 +130,9 @@ class Bot {
 
     // Сообщение не содержит текста
     if ($this->getType() === 'text' && empty($this->getContent())) {
+      $this->action = 'error';
       $this->method = 'deleteMessage';
       $this->sendData['message_id'] = $this->msgId;
-      $this->addChatId($this->chatId)->send();
-      $this->action = 'error';
       return;
     }
   }
@@ -379,7 +378,6 @@ class Bot {
   public function sendErrorMessage($msg = null) {
     $this->action = 'error';
     $this->sendData['text'] = is_integer($msg) ? self::SEND_ERROR_TG[$msg ?? 1] : $msg;
-    $this->addChatId($this->chatId)->send();
   }
 
   public function execCallBack() {
@@ -396,9 +394,10 @@ class Bot {
   public function sendToBot(string $msgId, array $reply = []): Bot {
     if ($this->subscribes === null) $this->loadSubscribe();
 
-    $this->setContent($msgId)
-         ->addChatId(array_keys($this->subscribes))
-         ->send($reply);
+    if ($this->action === 'error') $this->addChatId($this->chatId);
+    else $this->setContent($msgId)->addChatId(array_keys($this->subscribes));
+
+    $this->send($reply);
 
     return $this;
   }
