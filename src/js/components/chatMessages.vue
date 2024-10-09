@@ -5,8 +5,11 @@
       <div v-if="item.type === 'text'" class="message-box" v-html="getMsgContent(item.content)"></div>
 
       <template v-else>
-        <VImage v-if="isImage(item.content)" class="message-img" :src="item.content" alt="Image" preview></VImage>
-        <div v-else class="message-box">{{ getOriginalName(item.content) }}</div>
+        <VImage v-if="isImage(item)" class="message-img" :src="item.content" alt="Image" preview />
+        <video v-else-if="isVideo(item)" class="message-video" :src="item.content" controls="controls">
+
+        </video>
+        <a v-else :href="item.content" :download="getOriginalName(item.content)">Скачать файл: {{ getExtensionName(item.content) }}</a>
       </template>
       <div class="message-info">{{ item.author ? '' : 'Специалист,' }} {{ getChatDate(item.date) }}</div>
     </div>
@@ -54,8 +57,10 @@ export default {
     },
 
     getMsgContent(content) { return content.replaceAll('\n', '<br>') },
-    isImage(str) { return /(^blob|\.(png|svg|jpg)$)/i.test(str) },
-    getOriginalName(content) { return content.replace(/.+\/upload\//, '') },
+    isImage(item) { return item.type.includes('image') || /(^blob|\.(png|svg|jpg|gif)$)/i.test(item.content) },
+    isVideo(item) { return item.type.includes('video') || /(\.(avi|mp4|mov|mkv|webm|flv|swf)$)/i.test(item.content) },
+    getOriginalName(content) { return content.replace(/.+\/upload\//, location.host) },
+    getExtensionName(content) { return content.replace(/^.+\./, '') },
 
     getChatDate(date) {
       return this.today === date.slice(0, 10) ? date.slice(11) : new Date(Date.parse(date)).toLocaleString();

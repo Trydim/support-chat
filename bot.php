@@ -8,6 +8,8 @@ try {
   //file_put_contents(__DIR__ . '/logs/botLog.json', $data);
   $data = json_decode($data, true);
 
+  //def($data);
+
   $result = [];
 
   $main = new Main(['DEBUG' => true]);

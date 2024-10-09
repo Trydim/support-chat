@@ -181,6 +181,8 @@ class Db extends R {
   }
 
   public function addMessageFromTG(Bot $bot): string {
+    $msgId = '0';
+
     $this->checkConnection();
 
     $bean = self::dispense('messages');
@@ -188,32 +190,28 @@ class Db extends R {
     $user    = $bot->getUser();
 
     $chatKey = self::findOne('messages', ' chat_key LIKE ? ', ["%$chatKey%"])->chatKey;
-    if (empty($chatKey)) {
-      $bot->sendErrorMessage(2);
-      return '0';
-    }
+    if (empty($chatKey)) { $bot->sendErrorMessage(2); return $msgId; }
 
     if ($bot->getType() === 'file') {
       $bean->chatKey = $chatKey;
       $bean->userKey = $user;
-      $bean->type    = 'file';
       $bean->content = $bot->getContentFileUri();
+      $bean->type    = $bot->getType(true);
 
-      if (empty($bean->content)) {
-        $bot->sendErrorMessage(3);
-        return ['id' => false];
-      }
+      if (empty($bean->content)) { $bot->sendErrorMessage(3); return $msgId; }
 
-      R::store($bean);
+      $msgId = R::store($bean);
       $bean = self::dispense('messages');
     }
 
-    $bean->chatKey = $chatKey;
-    $bean->userKey = $user;
-    $bean->type    = 'text';
-    $bean->content = $bot->getContent();
+    if ($bean->content = $bot->getContent()) {
+      $bean->chatKey = $chatKey;
+      $bean->userKey = $user;
+      $bean->type    = 'text';
+      $msgId = R::store($bean);
+    }
 
-    return R::store($bean);
+    return $msgId;
   }
 
   public function setMessageId(string $id, string $messageId) {

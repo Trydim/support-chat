@@ -48,7 +48,7 @@ class SupportBtn {
 
   loadScript() {
     const script = document.createElement('script');
-    script.src = MAIN_URL + 'supportApp.js?ver=' + (Math.random() * 1000 | 0);
+    script.src = MAIN_URL + 'supportApp.js?ver=102';
 
     document.body.append(script);
     return script;

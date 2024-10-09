@@ -58,6 +58,10 @@ class Bot {
   /**
    * @var string
    */
+  private $mimeType;
+  /**
+   * @var string
+   */
   private $content;
 
   private $sendChatId = [];
@@ -95,18 +99,18 @@ class Bot {
     $data = $this->checkKeyCallBack($data);
 
     $message = $data['message'];
-    if (array_key_exists('photo', $message)) {
-      $this->original->file = $message['photo'];
 
-      if (array_key_exists('caption', $message)) $message['text'] = $message['caption'];
-    }
+    if (array_key_exists('photo', $message)) $this->original->file = $message['photo'];
+    if (array_key_exists('video', $message)) $this->original->file = $message['video'];
+    if (array_key_exists('document', $message)) $this->original->file = $message['document'];
+    if (array_key_exists('caption', $message)) $message['text'] = $message['caption'];
 
     $this->original->message = $message;
 
     $this->from   = $message['fromSite'] ?? null; // Не очень
     $this->msgId  = $message['message_id'] ?? '';
     $this->chatId = $message['chat']['id'] ?? '';
-    $this->type   = $message['type'] ?? null;
+    $this->type   = $message['type'] ?? (empty($this->original->file) ? 'text' : 'file');
   }
   private function checkKeyCallBack(array $data): array {
     if (!array_key_exists('callback_query', $data)) return $data;
@@ -161,10 +165,12 @@ class Bot {
 
   private function getContentFilePath(): string {
     $index = count($this->original->file) - 1;
-    $file  = $this->original->file[$index];
+    $file  = $this->original->file[$index] ?? $this->original->file;
 
     $result = httpRequest(self::URL_TELEGRAM . $this->useBotToken . '/getFile?file_id=' . $file['file_id']);
     if (!$result['ok']) def('getContentFilePath error', false);
+
+    $this->mimeType = $file['mime_type'] ?? null;
 
     return $result['result']['file_path'] ?? '';
   }
@@ -279,12 +285,12 @@ class Bot {
 
     return $this->username;
   }
-  public function getType(): string {
-    if ($this->type === null) {
-      $this->type = array_key_exists('photo', $this->original->message) ? 'file' : 'text';
-    }
+  public function getType(bool $addMime = false): string {
+    $type = $this->type;
 
-    return $this->type;
+    if ($addMime && !empty($this->mimeType)) $type .= '_' . $this->mimeType;
+
+    return $type;
   }
   public function getContent(): string {
     if ($this->content === null) {

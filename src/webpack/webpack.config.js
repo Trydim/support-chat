@@ -25,7 +25,7 @@ module.exports = env => {
     output : {
       path         : path.resolve(__dirname, '../../'),
       publicPath   : '/',
-      filename     : '[name].js',
+      filename     : dev ? '[name].js' : '[name].min.js',
       scriptType   : 'module',
       module       : true,
       libraryTarget: 'module',
@@ -54,24 +54,13 @@ module.exports = env => {
       minimizer: [`...`],
     },
     plugins: [
-      /*new MiniCssExtractPlugin({
-        filename(a) {
-          return a.chunk.name === 'login' ? 'css/login.css' : 'css/style.css';
-        },
-      }),*/
       new VueLoaderPlugin(),
-
-      /** Шаблон для React */
-      /*new HtmlWebpackPlugin({
-        /!*title: 'title',
-        filename: 'view/index.html',*!/
-        template: 'template/index.html',
-      }),*/
 
       new webpack.DefinePlugin({
         // Drop Options API from bundle
         __VUE_OPTIONS_API__  : 'true',
         __VUE_PROD_DEVTOOLS__: 'false',
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: false,
       }),
 
       //new BundleAnalyzerPlugin(),

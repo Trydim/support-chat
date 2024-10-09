@@ -1,5 +1,19 @@
+:root {
+  --p-image-toolbar-position-top: 0;
+  --p-image-toolbar-position-right: 0;
+  --p-image-toolbar-background: white;
+  --p-image-toolbar-border-color: transparent;
+  --p-image-toolbar-gap: 0.5rem;
+  --p-image-action-icon-size: 1rem;
+}
+
 ul {
   list-style: none;
+}
+
+.p-dialog {
+  margin: 0 !important;
+  //transition: all ease-in-out 0.5s;
 }
 
 // Header
@@ -13,32 +27,39 @@ ul {
   background: #e2f5ff;
 }
 
-.chat-title-icon {
-  position: relative;
-  left: 15px;
-}
-
 .chat-title {
   position: relative;
   left: 2rem;
   font-size: 14px;
   font-weight: 500;
-}
 
-.p-dialog-header-icons {
-  position: absolute;
-  right: 1rem;
-}
-
-.p-dialog-header-close {
-  transition: all 0.5s linear;
-  &:hover {
-    transform: scale(1.2);
-
-    path { fill: #002566; }
+  &-icon {
+    position: relative;
+    left: 15px;
   }
+}
 
-  &:focus { outline: none; }
+.p-dialog-header {
+  --p-dialog-header-gap: 0.5rem;
+  position: relative;
+
+  &-actions {
+    position: absolute;
+    top: 50%;
+    right: 1rem;
+    transform: translateY(-50%);
+
+    button:hover {
+      transform: scale(1.2);
+
+      path { fill: #002566; }
+    }
+
+    svg {
+      width: 1rem;
+      height: 1rem;
+    }
+  }
 }
 
 // Content
@@ -47,7 +68,6 @@ ul {
   border-left: 1px solid #e2f5ff;
   border-right: 1px solid #e2f5ff;
   background: white;
-  max-height: 60vh;
 }
 
 .chat-content {
@@ -61,17 +81,22 @@ ul {
     cursor: e-resize;
 
     &:hover {
-      background: #fdfdfd;
+      background: #e9d3d3;
     }
   }
 
   .right-border { right: 0; }
 
-  .p-image-preview-indicator {
+  .p-image-preview {
     width: 80%;
 
     &:hover {
       opacity: 0.5;
+    }
+
+    svg {
+      width: 1.5rem;
+      height: 1.5rem;
     }
   }
 }
@@ -83,8 +108,6 @@ ul {
   flex: 1;
   padding: 15px;
   min-height: 300px;
-  overflow-x: hidden;
-  overflow-y: auto;
 }
 
 .message-box-holder {
@@ -110,6 +133,10 @@ ul {
 }
 
 .message-img img {
+  max-width: 100%;
+}
+
+.message-video {
   max-width: 80%;
 }
 
@@ -146,6 +173,7 @@ ul {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: 100%;
   border-radius: 0 0 10px 10px;
   background: #E2F5FF;
 
@@ -211,20 +239,9 @@ ul {
     border: none;
     background: transparent;
     cursor: pointer;
+
+    &:disabled {
+      opacity: 0.5;
+    }
   }
-}
-
-.p-image-toolbar {
-  background: #e2f5ff;
-  border-radius: 4px;
-  padding: 4px;
-
-  svg {
-    width: 20px;
-    height: 20px;
-  }
-}
-
-.p-image-preview {
-  border-radius: 4px;
 }

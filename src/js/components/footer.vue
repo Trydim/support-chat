@@ -24,7 +24,7 @@
               @focus="onEnterEvent" @input="changeTextarea" @blur="removeEnterEvent"
     ></textarea>
 
-    <button type="button" class="message-send" @click="send">
+    <button type="button" class="message-send" :disabled="disabled" @click="send">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M12.8141 12.1969L5.2821 13.4519C5.19551 13.4664 5.11425 13.5034 5.04649 13.5592C4.97873 13.615 4.92686 13.6877 4.8961 13.7699L2.2991 20.7279C2.0511 21.3679 2.7201 21.9779 3.3341 21.6699L21.3341 12.6699C21.4585 12.6076 21.5631 12.5118 21.6362 12.3934C21.7093 12.275 21.7481 12.1386 21.7481 11.9994C21.7481 11.8603 21.7093 11.7238 21.6362 11.6054C21.5631 11.487 21.4585 11.3913 21.3341 11.3289L3.3341 2.32893C2.7201 2.02193 2.0511 2.63193 2.2991 3.27093L4.8971 10.2289C4.92786 10.3112 4.97973 10.3838 5.04749 10.4397C5.11525 10.4955 5.19651 10.5325 5.2831 10.5469L12.8151 11.8019C12.8621 11.8094 12.9049 11.8334 12.9357 11.8696C12.9666 11.9058 12.9836 11.9518 12.9836 11.9994C12.9836 12.047 12.9666 12.093 12.9357 12.1292C12.9049 12.1654 12.8621 12.1894 12.8151 12.1969" fill="#599CFF"/>
       </svg>
@@ -102,11 +102,21 @@ export default {
       this.file.size = blob.size;
       this.file.path = URL.createObjectURL(blob);
     },
+    fileError() {
+      this.message = 'Допустимый размер файла до 10мб!';
+      this.disabled = true;
+
+      setTimeout(() => {
+        this.message = '';
+        this.disabled = false;
+      }, 2000);
+    },
     uploadFile(e) {
       const blob = e.target.files[0];
 
       if (blob) {
-        this.setFileParam(blob);
+        if (blob.size < 1024*1024) this.setFileParam(blob);
+        else this.fileError();
         clearInput(e.target);
       }
     },

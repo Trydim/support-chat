@@ -1,13 +1,16 @@
 <template>
   <div>
-    <v-button @click="open"></v-button>
+    <v-button @click="open" />
 
     <Dialog v-model:visible="visible" ref="dialog" :style="dialogStyle"
+            maximizable draggable
             :position="position.toLowerCase()"
             :modal="true" :draggable="false"
-            :breakpoints="{'1199px': '75vw', '575px': '90vw'}" >
+            :breakpoints="{'1199px': '75vw', '575px': '90vw'}"
+            @maximize="maximize" @unmaximize="unMaximize"
+    >
       <template #header>
-        <dialog-header></dialog-header>
+        <dialog-header/>
       </template>
       <template #closeicon>
         <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -16,13 +19,12 @@
       </template>
 
       <div class="chat-content">
-        <left-border :node="$refs.dialog" @drag="dragSize"></left-border>
-        <right-border :node="$refs.dialog" @drag="dragSize"></right-border>
-        <chat-messages :sended="true" :content="content"></chat-messages>
+        <resize-border :position="position" :node="$refs.dialog" @drag="dragSize" />
+        <chat-messages :sended="true" :content="content" />
       </div>
 
       <template #footer>
-        <DialogFooter v-model="sendData" @send="send"></DialogFooter>
+        <DialogFooter v-model="sendData" @send="send"/>
       </template>
     </Dialog>
   </div>
@@ -37,8 +39,7 @@ import Dialog from 'primevue/dialog';
 
 import DialogHeader from "./components/header";
 import DialogFooter from "./components/footer";
-import LeftBorder from "./components/leftBorder";
-import RightBorder from "./components/rightBorder";
+import ResizeBorder from "./components/resizeBorder";
 import ChatMessages from "./components/chatMessages";
 import VButton from "./components/button";
 
@@ -55,12 +56,12 @@ export default {
     VButton,
     ChatMessages,
     DialogHeader,
-    LeftBorder, RightBorder,
+    ResizeBorder,
     DialogFooter,
     Dialog,
   },
   data: () => ({
-    dialogStyle: {width: '340px'},
+    dialogStyle: {width: '340px', minWidth: '340px', maxHeight: '60vh'},
     visible: false,
     position: POSITION[2],
 
@@ -102,7 +103,9 @@ export default {
     loadMessages(date) {
       query.Post({data: {action: 'loadMessages', date}}).then(d => {
         if (d['status']) {
-          window.localStorage.setItem(SUPPORT_KEY, this.userKey = d[SUPPORT_KEY]);
+          this.userKey = d[SUPPORT_KEY];
+          if (this.userKey !== window.localStorage.getItem(SUPPORT_KEY)) window.localStorage.setItem(SUPPORT_KEY, this.userKey);
+
           this.addContent(d['data']);
         }
       })
@@ -119,10 +122,9 @@ export default {
       this.startSync();
     },
 
-    dragSize(v) {
-      const cW = parseInt(this.dialogStyle.width);
-      this.dialogStyle.width = (cW + v) + 'px';
-    },
+    maximize() { this.dialogStyle.maxHeight = 'initial' },
+    unMaximize() { this.dialogStyle.maxHeight = '60vh' },
+    dragSize(v) { this.dialogStyle.width = v + 'px'; },
 
     send(finish) {
       const type = this.sendData instanceof Blob ? 'file' : 'text';
@@ -149,6 +151,8 @@ export default {
     let from = this.$globalSettings.from;
     if (from) from = typeof from === 'string' ? from : from(this);
     this.from = from || location.host + location.pathname;
+
+    if (this.$globalSettings.position) this.position = this.$globalSettings.position;
   },
   mounted() {
     this.open();
