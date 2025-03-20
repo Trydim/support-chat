@@ -22,7 +22,6 @@ ul {
   position: relative;
   border-radius: 10px 10px 0 0;
   height: 40px;
-  line-height: 40px;
   width: 100%;
   background: #e2f5ff;
 }
@@ -36,12 +35,14 @@ ul {
   &-icon {
     position: relative;
     left: 15px;
+    vertical-align: middle;
   }
 }
 
 .p-dialog-header {
   --p-dialog-header-gap: 0.5rem;
   position: relative;
+  color: #0c0c0c !important;
 
   &-actions {
     position: absolute;
