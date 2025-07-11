@@ -1,5 +1,7 @@
 <template>
-  <div>
+  <div style="position: relative">
+    <audio ref="melody" src="https://vistegra.by/support/new_message_notice.mp3" preload="auto" hidden></audio>
+
     <v-button @click="open" />
 
     <Dialog v-model:visible="visible" ref="dialog" :style="dialogStyle"
@@ -77,7 +79,6 @@ export default {
   watch   : {
     visible() {
       if (this.visible) this.startSync();
-      else this.stopSync();
     },
   },
   methods: {
@@ -97,7 +98,12 @@ export default {
         });
       });
 
-      data.length && (this.lastDate = data.pop().date);
+      if (data.length) {
+        this.lastDate = data.pop().date;
+
+        this.$refs.melody.currentTime = 0;
+        this.$refs.melody.play();
+      }
     },
 
     loadMessages(date) {

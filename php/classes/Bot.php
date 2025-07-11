@@ -3,7 +3,7 @@
 class Bot {
   const URL_TELEGRAM = 'https://api.telegram.org/bot';
   const URL_FILE_TELEGRAM = 'https://api.telegram.org/file/bot';
-  const TOKEN_TELEGRAM = '6985649319:AAEm0yWTVN1EJd4_QN2AQLFZFAW9pj5lKBU';
+  const TOKEN_TELEGRAM = '7857864627:AAFKUcF9n5LKrAmCzQyTp2zkKocUg14EO48';
 
   const BOT_PATH       = __DIR__ . '/../../storage/botList.json';
   const SUBSCRIBE_PATH = __DIR__ . '/../../storage/subscribeList';

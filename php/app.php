@@ -14,4 +14,3 @@ const DB_CONFIG = [
 ];
 
 spl_autoload_register('cmsAutoloader');
-
