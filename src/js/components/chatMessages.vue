@@ -1,7 +1,7 @@
 <template>
   <div ref="msgContent" class="chat-messages" @scroll="autoScroll = false">
     <div v-for="(item, index) of content" :key="index"
-         class="message-box-holder" :class="{'message-right': item.author}">
+         class="message-box-holder" :class="{'message-right': item.isAuthor}">
       <div v-if="item.type === 'text'" class="message-box" v-html="getMsgContent(item.content)"></div>
 
       <template v-else>
@@ -11,7 +11,7 @@
         </video>
         <a v-else :href="item.content" :download="getOriginalName(item.content)">Скачать файл: {{ getExtensionName(item.content) }}</a>
       </template>
-      <div class="message-info">{{ item.author ? '' : 'Специалист,' }} {{ getChatDate(item.date) }}</div>
+      <div class="message-info">{{ item.isAuthor ? '' : 'Специалист,' }} {{ getChatDate(item.date) }}</div>
     </div>
   </div>
 </template>
@@ -47,7 +47,6 @@ export default {
   },
   methods: {
     scrollChat() {
-
       // отключать автопрокрутку при обновлении если пользователь прокрутил вверх
       // включать автопрокрутку при отправлении сообщений
       setTimeout(() => {

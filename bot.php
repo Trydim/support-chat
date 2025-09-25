@@ -28,7 +28,7 @@ try {
       //$msg = $bot->checkReply() ? $main->db->loadMessageById($bot->getDBMessageId()) : [];
       $msg = $main->db->loadMessageById($bot->getDBMessageId());
 
-      // расскидать всем подписчикам в боте
+      // Раскидать всем подписчикам в боте
       $bot->sendToBot('', $msg['message_id'] ?? []);
 
       //if (count($bot->getComplete())) $main->db->setMessageId($msgId, $bot->prepareMessageId());

@@ -33,7 +33,23 @@ switch ($action) {
     $result['error'] = $bot->getError();
     break;
   case 'loadMessages':
-    $result['data'] = $main->db->loadMessages();
+    $startTime = time();
+
+    while (true) {
+      $msg = $main->db->loadMessages();
+      if (count($msg)) {
+        $result['data'] = $msg;
+        break;
+      }
+
+      if (time() - $startTime > POOLING_TIME_OUT) {
+        $result['data'] = [];
+        break;
+      }
+
+      sleep(1);
+    }
+
     break;
 
   default: die('default action');

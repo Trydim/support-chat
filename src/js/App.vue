@@ -21,8 +21,8 @@
       </template>
 
       <div class="chat-content">
-        <resize-border :position="position" :node="$refs.dialog" @drag="dragSize" />
-        <chat-messages :sended="true" :content="content" />
+        <resize-border :position :node="$refs.dialog" @drag="dragSize" />
+        <chat-messages :sended="true" :content />
       </div>
 
       <template #footer>
@@ -34,7 +34,7 @@
 
 <script>
 
-import {DEBUG, POSITION, SUPPORT_KEY, SYNC_DELAY, SYNC_INTERVAL} from "./const";
+import {POSITION, SUPPORT_KEY, SYNC_DELAY} from "./const";
 import query from "./libs/query";
 
 import Dialog from 'primevue/dialog';
@@ -44,6 +44,8 @@ import DialogFooter from "./components/footer";
 import ResizeBorder from "./components/resizeBorder";
 import ChatMessages from "./components/chatMessages";
 import VButton from "./components/button";
+
+const orderId = new Set();
 
 const getISODate = () => {
   const d = new Date(),
@@ -71,36 +73,36 @@ export default {
     from   : undefined, // От кого сообщение
     lastDate: undefined,
 
-    syncInterval: undefined,
+    fastRequest: false,
     content: [],
     sendData: '',
   }),
   computed: {},
   watch   : {
     visible() {
-      if (this.visible) this.startSync();
+      this.fastRequest = this.visible;
+
+      if (this.visible) this.loadMessages();
     },
   },
   methods: {
-    open() {
-      this.visible = true;
-
-      !this.lastDate && this.loadMessages();
-    },
+    open() { this.visible = true },
 
     addContent(data) {
+      let playSound = false;
+
       data.forEach(item => {
-        this.content.push({
-          author: item.userKey === this.userKey,
-          date  : item.date,
-          type  : item.type,
-          content: item.content,
-        });
+        if (orderId.has(item.id)) return;
+        orderId.add(item.id);
+
+        const isAuthor = item.userKey === this.userKey;
+        if (!isAuthor) playSound = true;
+
+        this.content.push({...item, isAuthor});
       });
 
-      if (data.length) {
-        this.lastDate = data.pop().date;
-
+      if (data.length) this.lastDate = data.pop().date;
+      if (playSound) {
         this.$refs.melody.currentTime = 0;
         this.$refs.melody.play();
       }
@@ -114,28 +116,17 @@ export default {
 
           this.addContent(d['data']);
         }
+
+        setTimeout(() => this.loadMessages(this.lastDate), this.fastRequest ? 1000 : SYNC_DELAY);
       })
-    },
-
-    startSync() {
-      this.syncInterval = setInterval(() => this.loadMessages(this.lastDate), SYNC_INTERVAL);
-
-      setTimeout(() => this.stopSync(), SYNC_DELAY);
-    },
-    stopSync() { clearInterval(this.syncInterval) },
-    restartSync() {
-      this.stopSync();
-      this.startSync();
     },
 
     maximize() { this.dialogStyle.maxHeight = 'initial' },
     unMaximize() { this.dialogStyle.maxHeight = '60vh' },
-    dragSize(v) { this.dialogStyle.width = v + 'px'; },
+    dragSize(v) { this.dialogStyle.width = v + 'px' },
 
     send(finish) {
       const type = this.sendData instanceof Blob ? 'file' : 'text';
-
-      this.restartSync();
 
       query.Post({
         data: {

@@ -31,6 +31,7 @@ CREATE TABLE `messages` (
   `id` int(11) NOT NULL,
   `chat_key` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
   `user_key` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `message_id` varchar(500) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT '{}',
   `date` timestamp NOT NULL DEFAULT current_timestamp(),
   `type` varchar(10) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'text',
   `content` varchar(1000) COLLATE utf8mb4_unicode_ci NOT NULL
