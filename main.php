@@ -8,7 +8,7 @@ require __DIR__ . '/php/app.php';
 
 //def($_SERVER);
 
-$main = new Main(['DEBUG' => true]);
+$main = new Main();
 
 $action = $main->getParam('action');
 $result[STORAGE_SUPPORT_KEY] = $main->getParam(STORAGE_SUPPORT_KEY);

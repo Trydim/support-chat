@@ -241,6 +241,7 @@ class Bot {
 
       if ($result[$id]['ok']) $this->complete[] = $result[$id]['result'];
       else $error[] = $result[$id];
+      sleep(1);
     }
 
     if (count($error)) {

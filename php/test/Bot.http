@@ -31,3 +31,27 @@ query test
 --WebAppBoundary--
 
 ###{"chat_id":1,"parse_mode":"HTML","text":"<b>supportchat\/<\/b>:\nlocal test","reply_markup":{"inline_keyboard":[[{"text":"\u0425","callback_data":"hideBtn"},{"text":"\u041e\u0442\u0432\u0435\u0442\u0438\u0442\u044c","switch_inline_query_current_chat":">2721384<:\n\n"}]]}}
+
+###
+POST https://api.telegram.org/bot7857864627:AAFKUcF9n5LKrAmCzQyTp2zkKocUg14EO48/sendMessage
+Content-Type: application/json; charset=utf-8
+
+{
+  "chat_id": 7766049420,
+  "parse_mode": "HTML",
+  "text": "<b>test<\/b>:\ntest",
+  "reply_markup": {
+    "inline_keyboard": [
+      [
+        {
+          "text": "\u0425",
+          "callback_data": "hideBtn"
+        },
+        {
+          "text": "\u041e\u0442\u0432\u0435\u0442\u0438\u0442\u044c",
+          "switch_inline_query_current_chat": ">44-4768638<:\n\n"
+        }
+      ]
+    ]
+  }
+}

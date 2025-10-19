@@ -1,0 +1,14 @@
+### url - https://vistegra.by/support/bot.php
+### token - '' | 'ligron' - пусто для общего бота.
+
+### botKey - 7857864627:AAFKUcF9n5LKrAmCzQyTp2zkKocUg14EO48 - общий бот
+### botKey - 7619101280:AAGikWMXkclU2JC5ZE0p2hGP1fxwiURt38U - ligron
+
+### getWebhookInfo
+GET https://api.telegram.org/bot{{$botKey}}/getWebhookInfo
+
+### setWebhook
+GET https://api.telegram.org/bot{{$botKey}}/setWebhook?url={{$url}}&secret_token={{$token}}
+
+### deleteWebhook
+GET https://api.telegram.org/bot{{$botKey}}/deleteWebhook

@@ -12,7 +12,7 @@ try {
 
   $result = [];
 
-  $main = new Main(['DEBUG' => true]);
+  $main = new Main();
   $bot  = new Bot($data, true, $main->getParam('token'));
   $action = $bot->getAction();
 

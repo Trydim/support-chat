@@ -1,9 +1,8 @@
 1) Для подключения добавить на страницу:
-<script src="https://vistegra.by/support/support.js"></script>
-
+<script src="https://vistegra.by/support/support.min.js"></script>
 Этого достаточно, что бы чат работал с общим ботом.
 
-2) Настройки (не обязательно). Для настроект используется глобальная переменная:
+2) Настройки (не обязательно). Для настроек используется глобальная переменная:
 <script>
     window.supportBotSettings = {...}
 </script>

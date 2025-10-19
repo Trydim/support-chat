@@ -37,7 +37,7 @@ final class Main {
    * Main constructor.
    * @param array $param
    */
-  public function __construct(array $param) {
+  public function __construct() {
     $this->setSettings(VC::DB_CONFIG, DB_CONFIG);
 
     $this->db = new Db($this);
